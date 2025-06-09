@@ -1,53 +1,97 @@
-import Link from "next/link";
+"use client";
 
-import { LatestPost } from "~/app/_components/post";
-import { api, HydrateClient } from "~/trpc/server";
+import { useChat } from "@ai-sdk/react";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
+export default function Chat() {
+  const {
+    messages,
+    setMessages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    error,
+    reload,
+    stop,
+    status,
+  } = useChat({
+    maxSteps: 5,
+    experimental_throttle: 50,
+    onFinish: (message, { usage, finishReason }) => {
+      console.log("Finished streaming message:", message);
+      console.log("Token usage:", usage);
+      console.log("Finish reason:", finishReason);
+    },
+    onError: (error) => {
+      console.error("An error occurred:", error);
+    },
+    onResponse: (response) => {
+      console.log("Received HTTP response from server:", response);
+    },
+  });
 
-  void api.post.getLatest.prefetch();
+  const handleDelete = (id: string) => {
+    setMessages(messages.filter((message) => message.id !== id));
+  };
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-          </div>
-
-          <LatestPost />
+    <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">
+      {messages.map((message) => (
+        <div key={message.id} className="whitespace-pre-wrap">
+          {message.role === "user" ? "User: " : "AI: "}
+          {message.parts.map((part, i) => {
+            switch (part.type) {
+              case "text":
+                return (
+                  <div key={`${message.id}-${i}`}>
+                    {part.text}
+                    <button onClick={() => handleDelete(message.id)}>
+                      {" "}
+                      -- click to delete
+                    </button>
+                  </div>
+                );
+              case "tool-invocation":
+                return (
+                  <pre key={`${message.id}-${i}`}>
+                    {JSON.stringify(part.toolInvocation, null, 2)}
+                  </pre>
+                );
+            }
+          })}
         </div>
-      </main>
-    </HydrateClient>
+      ))}
+
+      {error && (
+        <>
+          <div>An error occurred.</div>
+          <button type="button" onClick={() => reload()}>
+            Retry
+          </button>
+        </>
+      )}
+
+      <button
+        onClick={() => stop()}
+        disabled={!(status === "streaming" || status === "submitted")}
+      >
+        Stop
+      </button>
+      <button
+        onClick={() => reload()}
+        disabled={!(status === "ready" || status === "error")}
+      >
+        Regenerate
+      </button>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          className="fixed bottom-0 mb-8 w-full max-w-md rounded border border-zinc-300 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+          value={input}
+          placeholder="Say something..."
+          onChange={handleInputChange}
+          disabled={error != null}
+        />
+      </form>
+    </div>
   );
 }
