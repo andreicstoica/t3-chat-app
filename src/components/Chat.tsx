@@ -3,7 +3,7 @@
 import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
 import clsx from "clsx";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const chatStyle =
   "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700 mb-2";
@@ -15,7 +15,7 @@ interface ChatProps {
 
 export default function Chat({ id, initialMessages }: ChatProps) {
   const {
-    messages, // This state variable contains all messages *before* the latest AI response
+    messages,
     setMessages,
     input,
     handleInputChange,
@@ -36,59 +36,28 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       size: 16,
     }),
     experimental_prepareRequestBody({ messages, id }) {
-      // This is correct: sends only the last user message to the API
       return { message: messages[messages.length - 1], id };
     },
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    onFinish: async (lastGeneratedMessage) => {
-      // This contains the AI's response
-      console.log("client side: ai stream finished, trying to save chat");
-
-      // DIAGNOSTIC LOGS (these should show the current user message but NOT the AI message yet)
-      console.log("Client-side useChat 'messages' state (pre-AI):", messages);
-      console.log(
-        "Client-side lastGeneratedMessage from onFinish:",
-        lastGeneratedMessage,
-      );
-
-      // ******* THIS IS THE CORE FIX *******
-      // We need to combine the `messages` state (which has user's last msg)
-      // with the `lastGeneratedMessage` (which is the AI's response).
-      const fullChatHistoryForSave = [...messages, lastGeneratedMessage];
-      // ************************************
-
-      console.log(
-        "Client-side fullChatHistoryForSave (to send to API):",
-        fullChatHistoryForSave,
-      );
-      console.log(
-        "Client-side fullChatHistoryForSave count:",
-        fullChatHistoryForSave.length,
-      );
-
-      try {
-        const response = await fetch("/api/save-chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: id, messages: fullChatHistoryForSave }), // Send the COMBINED history
-        });
-
-        if (!response.ok) {
-          console.log(
-            "client side: failed to save chat history",
-            response.status,
-            response.statusText,
-          );
-        } else {
-          console.log("client side: chat saved ok!");
-        }
-      } catch (error) {
-        console.error("client side: error saving chat history:", error);
+    onFinish: (lastGeneratedMessage) => {
+      let fullChatHistoryForSave;
+      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+        fullChatHistoryForSave = [...messages, lastGeneratedMessage];
+      } else {
+        const userMsg = {
+          id: 'msgc-' + Math.random().toString(36).slice(2),
+          role: 'user',
+          content: input,
+          createdAt: new Date().toISOString(),
+          parts: [{ type: 'text', text: input }],
+        };
+        fullChatHistoryForSave = [...messages, userMsg, lastGeneratedMessage];
       }
+      void fetch("/api/save-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, messages: fullChatHistoryForSave }),
+      });
     },
-
     onError: (error) => {
       console.error("client side: ai stream error:", error);
     },

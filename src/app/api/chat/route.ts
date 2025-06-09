@@ -8,7 +8,6 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    // CORRECT: Expect `message` and `id` as per your experimental_prepareRequestBody
     const { message, id } = await req.json() as { message: Message, id: string };
 
     const previousMessages = await getChatMessages(id);
@@ -16,10 +15,9 @@ export async function POST(req: Request) {
       throw new Error('messages are somehow null?');
     }
 
-    // CORRECT: Append the single client message to the historical messages from DB
     const messagesToSendToAI = appendClientMessage({
-      messages: previousMessages, // Messages from DB
-      message, // The single new user message from client
+      messages: previousMessages,
+      message,
     });
 
     const result = streamText({
@@ -27,7 +25,6 @@ export async function POST(req: Request) {
       system:
         'You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco',
       messages: messagesToSendToAI,
-      // onFinish is NOT here on the server
       experimental_generateMessageId: createIdGenerator({
         prefix: 'msgs',
         size: 16,
