@@ -8,6 +8,13 @@
       "when": 1749502160749,
       "tag": "0000_marvelous_scrambler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749509915011,
+      "tag": "0001_pale_medusa",
+      "breakpoints": true
     }
   ]
 }
