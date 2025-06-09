@@ -1,11 +1,8 @@
 // app/api/save-chat/route.ts
-
-console.log('### Server /api/save-chat/route.ts loaded and running! ###'); // <-- Check for this
-
 import { saveChatMessages } from '~/tools/chat-store';
 import type { Message } from 'ai'; 
 
-export const maxDuration = 10; // This route is simple, doesn't need much time
+export const maxDuration = 10; 
 
 export async function POST(req: Request) {
   try {

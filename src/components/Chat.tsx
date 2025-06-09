@@ -3,7 +3,7 @@
 import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 const chatStyle =
   "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700 mb-2";
@@ -40,15 +40,18 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     },
     onFinish: (lastGeneratedMessage) => {
       let fullChatHistoryForSave;
-      if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+      if (
+        messages.length > 0 &&
+        messages[messages.length - 1]!.role === "user"
+      ) {
         fullChatHistoryForSave = [...messages, lastGeneratedMessage];
       } else {
         const userMsg = {
-          id: 'msgc-' + Math.random().toString(36).slice(2),
-          role: 'user',
+          id: "msgc-" + Math.random().toString(36).slice(2),
+          role: "user",
           content: input,
           createdAt: new Date().toISOString(),
-          parts: [{ type: 'text', text: input }],
+          parts: [{ type: "text", text: input }],
         };
         fullChatHistoryForSave = [...messages, userMsg, lastGeneratedMessage];
       }
@@ -149,7 +152,10 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           disabled={error != null}
           className="mr-2 flex-1 rounded border border-zinc-300 px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700"
         />
-        <button type="submit" className="ml-2 w-auto px-4">
+        <button
+          type="submit"
+          className="ml-2 w-auto rounded border border-zinc-300 px-4 hover:cursor-pointer hover:bg-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700"
+        >
           Send
         </button>
       </form>

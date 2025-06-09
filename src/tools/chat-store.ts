@@ -8,12 +8,11 @@ const id = generateId(); // generate a unique chat ID
   console.log(`[createChat] Attempting to create new chat with ID: ${id}`);
   console.log(`[createChat] Chat name: New chat id: ${id}`);
   try {
-    // Adding .returning({ id: chats.id }) here too is helpful for debugging
     const insertedRows = await db.insert(chats).values({
       id: id,
       name: `New chat id: ${id}`,
       // messages column will default to []
-    }).returning({ id: chats.id }); // <--- Add .returning() here too!
+    }).returning({ id: chats.id }); 
 
     if (insertedRows.length > 0) {
       console.log(`[createChat] Successfully created chat ID: ${insertedRows[0]?.id}`);
@@ -25,7 +24,6 @@ const id = generateId(); // generate a unique chat ID
     }
   } catch (error) {
     console.error(`[createChat] Error creating chat with ID ${id}:`, error);
-    // You might want to re-throw or handle the error to prevent redirection to a non-existent chat
     throw error;
   }
 }

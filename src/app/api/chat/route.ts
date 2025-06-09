@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: openai('gpt-4o'),
       system:
-        'You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco',
+        "You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco. once you learn they aren't taco, be really nice!",
       messages: messagesToSendToAI,
       experimental_generateMessageId: createIdGenerator({
         prefix: 'msgs',
