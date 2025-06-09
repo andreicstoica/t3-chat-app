@@ -12,16 +12,23 @@ import { index, pgTableCreator } from "drizzle-orm/pg-core";
  */
 export const createTable = pgTableCreator((name) => `t3-chat-app_${name}`);
 
-export const posts = createTable(
-  "post",
+import { type Message } from "ai";
+type Messages = Message[]
+
+export const chats = createTable(
+  "chat",
   (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
+    id: d.varchar({ length: 256 }).primaryKey().notNull(),
+    name: d.varchar({ length: 256 }).notNull(),
     createdAt: d
       .timestamp({ withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+    messages: d.
+    jsonb('messages')
+    .$type<Messages>()
+    .default([]),
   }),
-  (t) => [index("name_idx").on(t.name)],
-);
+  (t) => [index("chat_name_idx").on(t.name)]
+)

@@ -8,12 +8,14 @@ import { useEffect, useRef } from "react";
 const chatStyle =
   "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700 mb-2";
 
-export default function Chat({
-  id,
-  initialMessages,
-}: { id?: string | undefined; initialMessages?: Message[] } = {}) {
+interface ChatProps {
+  id: string;
+  initialMessages: Message[];
+}
+
+export default function Chat({ id, initialMessages }: ChatProps) {
   const {
-    messages,
+    messages, // This state variable contains all messages *before* the latest AI response
     setMessages,
     input,
     handleInputChange,
@@ -23,8 +25,9 @@ export default function Chat({
     stop,
     status,
   } = useChat({
-    id,
-    initialMessages,
+    id: id,
+    initialMessages: initialMessages,
+    api: "/api/chat",
     sendExtraMessageFields: true,
     maxSteps: 5,
     experimental_throttle: 50,
@@ -33,18 +36,61 @@ export default function Chat({
       size: 16,
     }),
     experimental_prepareRequestBody({ messages, id }) {
+      // This is correct: sends only the last user message to the API
       return { message: messages[messages.length - 1], id };
     },
-    onFinish: (message, { usage, finishReason }) => {
-      console.log("Finished streaming message:", message);
-      console.log("Token usage:", usage);
-      console.log("Finish reason:", finishReason);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    onFinish: async (lastGeneratedMessage) => {
+      // This contains the AI's response
+      console.log("client side: ai stream finished, trying to save chat");
+
+      // DIAGNOSTIC LOGS (these should show the current user message but NOT the AI message yet)
+      console.log("Client-side useChat 'messages' state (pre-AI):", messages);
+      console.log(
+        "Client-side lastGeneratedMessage from onFinish:",
+        lastGeneratedMessage,
+      );
+
+      // ******* THIS IS THE CORE FIX *******
+      // We need to combine the `messages` state (which has user's last msg)
+      // with the `lastGeneratedMessage` (which is the AI's response).
+      const fullChatHistoryForSave = [...messages, lastGeneratedMessage];
+      // ************************************
+
+      console.log(
+        "Client-side fullChatHistoryForSave (to send to API):",
+        fullChatHistoryForSave,
+      );
+      console.log(
+        "Client-side fullChatHistoryForSave count:",
+        fullChatHistoryForSave.length,
+      );
+
+      try {
+        const response = await fetch("/api/save-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: id, messages: fullChatHistoryForSave }), // Send the COMBINED history
+        });
+
+        if (!response.ok) {
+          console.log(
+            "client side: failed to save chat history",
+            response.status,
+            response.statusText,
+          );
+        } else {
+          console.log("client side: chat saved ok!");
+        }
+      } catch (error) {
+        console.error("client side: error saving chat history:", error);
+      }
     },
+
     onError: (error) => {
-      console.error("An error occurred:", error);
-    },
-    onResponse: (response) => {
-      console.log("Received HTTP response from server:", response);
+      console.error("client side: ai stream error:", error);
     },
   });
 

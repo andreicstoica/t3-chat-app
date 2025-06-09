@@ -1,3 +1,5 @@
-export default async function Home() {
-  // TODO: make a new chat button or pick from recent lol
+import { redirect } from "next/navigation";
+
+export default async function Page() {
+  redirect(`/chat`); // redirect to chat page, see below
 }
