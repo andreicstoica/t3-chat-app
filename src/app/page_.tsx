@@ -1,5 +1,3 @@
-import Chat from "~/components/Chat";
-
 export default async function Home() {
-  return <Chat />;
+  // TODO: make a new chat button or pick from recent lol
 }

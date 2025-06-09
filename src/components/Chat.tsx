@@ -32,6 +32,9 @@ export default function Chat({
       prefix: "msgc",
       size: 16,
     }),
+    experimental_prepareRequestBody({ messages, id }) {
+      return { message: messages[messages.length - 1], id };
+    },
     onFinish: (message, { usage, finishReason }) => {
       console.log("Finished streaming message:", message);
       console.log("Token usage:", usage);

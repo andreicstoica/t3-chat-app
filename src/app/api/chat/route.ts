@@ -1,12 +1,18 @@
 import { openai } from '@ai-sdk/openai';
-import { appendResponseMessages, createIdGenerator, streamText, tool, type Message } from 'ai';
+import { appendClientMessage, appendResponseMessages, createIdGenerator, streamText, tool, type Message } from 'ai';
 import { z } from 'zod';
-import { saveChat } from '~/tools/chat-store'
+import { loadChat, saveChat } from '~/tools/chat-store'
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages, id } = await req.json() as { messages: Message[], id: string };
+  const { message, id } = await req.json() as { message: Message, id: string };
+
+  const previousMessages = await loadChat(id);
+  const messages = appendClientMessage({
+    messages: previousMessages,
+    message,
+  });
 
   const result = streamText({
     model: openai('gpt-4o'),
@@ -41,6 +47,10 @@ export async function POST(req: Request) {
       }),
     },
   });
+
+  // consume the stream to ensure it runs to completion & triggers onFinish
+  // even when the client response is aborted:
+  void result.consumeStream(); // no await - explicitly ignoring Promise result
 
   return result.toDataStreamResponse({
     getErrorMessage: error => {
