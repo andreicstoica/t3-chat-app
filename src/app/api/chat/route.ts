@@ -1,16 +1,30 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
-import type { Message } from 'ai';
+import { appendResponseMessages, createIdGenerator, streamText, tool, type Message } from 'ai';
 import { z } from 'zod';
+import { saveChat } from '~/tools/chat-store'
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages }: { messages: Message[] } = await req.json() as { messages: Message[] };
+  const { messages, id } = await req.json() as { messages: Message[], id: string };
 
   const result = streamText({
     model: openai('gpt-4o'),
+    system: "You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco",
     messages,
+    async onFinish({ response }) {
+      await saveChat({
+        id,
+        messages: appendResponseMessages({
+          messages,
+          responseMessages: response.messages,
+        }),
+      });
+    },
+    experimental_generateMessageId: createIdGenerator({
+      prefix: 'msgs',
+      size: 16,
+    }),
     tools: {
       weather: tool({
         description: 'Get the weather in a location (fahrenheit)',

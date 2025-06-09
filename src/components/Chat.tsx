@@ -1,11 +1,17 @@
-import { useChat } from "@ai-sdk/react";
+"use client";
+
+import { useChat, type Message } from "@ai-sdk/react";
+import { createIdGenerator } from "ai";
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
 
 const chatStyle =
   "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700 mb-2";
 
-export default function Chat() {
+export default function Chat({
+  id,
+  initialMessages,
+}: { id?: string | undefined; initialMessages?: Message[] } = {}) {
   const {
     messages,
     setMessages,
@@ -17,8 +23,15 @@ export default function Chat() {
     stop,
     status,
   } = useChat({
+    id,
+    initialMessages,
+    sendExtraMessageFields: true,
     maxSteps: 5,
     experimental_throttle: 50,
+    generateId: createIdGenerator({
+      prefix: "msgc",
+      size: 16,
+    }),
     onFinish: (message, { usage, finishReason }) => {
       console.log("Finished streaming message:", message);
       console.log("Token usage:", usage);
