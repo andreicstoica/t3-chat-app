@@ -68,32 +68,36 @@ export default function Chat({
         {" "}
         {messages.map((message) => (
           <div key={message.id} className={chatStyle}>
-            {message.role === "user" ? "User: " : "AI: "}
             {message.parts.map((part, i) => {
               switch (part.type) {
                 case "text":
                   return (
                     <div key={`${message.id}-${i}`}>
-                      {part.text}
-                      <button onClick={() => handleDelete(message.id)}>
-                        {"click to: "}
-                        click to delete
-                      </button>
-                      <button
-                        onClick={() => stop()}
-                        className={clsx({ hidden: message.role === "user" })}
-                      >
-                        {"--"}
-                        stop
-                      </button>
-                      <button
-                        onClick={() => reload()}
-                        disabled={!(status === "ready" || status === "error")}
-                        className={clsx({ hidden: message.role === "user" })}
-                      >
-                        {"--"}
-                        reload
-                      </button>
+                      <span className="font-bold">
+                        {message.role === "user" ? "User: " : "AI: "}
+                      </span>
+                      {part.text}{" "}
+                      <div>
+                        <button onClick={() => handleDelete(message.id)}>
+                          {"click to: "}
+                          delete
+                        </button>
+                        <button
+                          onClick={() => stop()}
+                          className={clsx({ hidden: message.role === "user" })}
+                        >
+                          {"--"}
+                          stop
+                        </button>
+                        <button
+                          onClick={() => reload()}
+                          disabled={!(status === "ready" || status === "error")}
+                          className={clsx({ hidden: message.role === "user" })}
+                        >
+                          {"--"}
+                          reload
+                        </button>
+                      </div>
                     </div>
                   );
                 case "tool-invocation":

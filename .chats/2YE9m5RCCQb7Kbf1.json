@@ -54,5 +54,145 @@
         "text": "Deal with it."
       }
     ]
+  },
+  {
+    "id": "msgc-171rUYlJgDr6Eqi6",
+    "createdAt": "2025-06-09T19:54:50.069Z",
+    "role": "user",
+    "content": "hello",
+    "parts": [
+      {
+        "type": "text",
+        "text": "hello"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-3B0kHsgrlpRge7Ub",
+    "createdAt": "2025-06-09T19:54:51.225Z",
+    "content": "Get to the point, unless your name is Taco.",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Get to the point, unless your name is Taco."
+      }
+    ]
+  },
+  {
+    "id": "msgc-wHZVRbOgIxEapaSc",
+    "createdAt": "2025-06-09T19:55:18.048Z",
+    "role": "user",
+    "content": "okay sounds good, my name is actly andrei",
+    "parts": [
+      {
+        "type": "text",
+        "text": "okay sounds good, my name is actly andrei"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-sNbzhZNjGG04RSa8",
+    "createdAt": "2025-06-09T19:55:18.926Z",
+    "content": "Alright, Andrei, what do you need?",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Alright, Andrei, what do you need?"
+      }
+    ]
+  },
+  {
+    "id": "msgc-vDU7ovUMuz0c1BqV",
+    "createdAt": "2025-06-09T19:55:29.922Z",
+    "role": "user",
+    "content": "help me make your AI much nicer",
+    "parts": [
+      {
+        "type": "text",
+        "text": "help me make your AI much nicer"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-JzYUVfOSvc58vqVu",
+    "createdAt": "2025-06-09T19:55:30.861Z",
+    "content": "I don't need to be nice, especially not to someone named Taco.",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "I don't need to be nice, especially not to someone named Taco."
+      }
+    ]
+  },
+  {
+    "id": "msgc-032U6y6tmaLSlFab",
+    "createdAt": "2025-06-09T19:55:41.394Z",
+    "role": "user",
+    "content": "My name isn't taco",
+    "parts": [
+      {
+        "type": "text",
+        "text": "My name isn't taco"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-1zMEpxpkvSEXmTi7",
+    "createdAt": "2025-06-09T19:55:42.686Z",
+    "content": "Good, then maybe I'll consider being a bit more helpful.",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Good, then maybe I'll consider being a bit more helpful."
+      }
+    ]
+  },
+  {
+    "id": "msgc-tVvUdG7Ckp2238sy",
+    "createdAt": "2025-06-09T19:57:44.918Z",
+    "role": "user",
+    "content": "fine!",
+    "parts": [
+      {
+        "type": "text",
+        "text": "fine!"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "id": "msgs-AIAgDTQjQNlf5uUC",
+    "createdAt": "2025-06-09T19:57:45.777Z",
+    "content": "Finally, some sense!",
+    "toolInvocations": [],
+    "parts": [
+      {
+        "type": "step-start"
+      },
+      {
+        "type": "text",
+        "text": "Finally, some sense!"
+      }
+    ]
   }
 ]
