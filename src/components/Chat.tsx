@@ -2,11 +2,15 @@
 
 import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
-import clsx from "clsx";
 import { useEffect, useRef } from "react";
 
+import clsx from "clsx";
+import { Button } from "~/components/ui/button";
+import { Input } from "./ui/input";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+
 const chatStyle =
-  "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700 mb-2";
+  "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:outline-none dark:border-zinc-700 mb-2";
 
 interface ChatProps {
   id: string;
@@ -79,11 +83,10 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   }, [messages]);
 
   return (
-    <div className="mx-auto flex h-screen w-full max-w-md flex-col p-4">
+    <div className="mx-auto flex h-screen w-full max-w-lg flex-col p-4">
       {" "}
       {/* Scrollable message container */}
-      <div className="flex-1 overflow-y-auto pr-4">
-        {" "}
+      <ScrollArea className="flex-1 overflow-y-auto">
         {messages.map((message) => (
           <div key={message.id} className={chatStyle}>
             {message.parts.map((part, i) => {
@@ -139,25 +142,26 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
+      </ScrollArea>
       {/* Input form fixed at the bottom flex-col flow */}
       <form
         onSubmit={handleSubmit}
-        className="mt-4 flex w-full justify-between self-center rounded border border-zinc-300 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        className="mt-4 flex w-full justify-between space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
       >
-        <input
+        <Input
+          type="text"
           value={input}
-          placeholder="Say something..."
           onChange={handleInputChange}
+          placeholder="How can I help?"
           disabled={error != null}
-          className="mr-2 flex-1 rounded border border-zinc-300 px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700"
         />
-        <button
+        <Button
           type="submit"
-          className="ml-2 w-auto rounded border border-zinc-300 px-4 hover:cursor-pointer hover:bg-zinc-100 focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-zinc-700"
+          variant="ghost"
+          className="hover:cursor-pointer hover:bg-zinc-200"
         >
           Send
-        </button>
+        </Button>
       </form>
     </div>
   );
