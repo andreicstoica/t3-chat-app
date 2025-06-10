@@ -3,6 +3,7 @@
 import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "./ui/input";
@@ -17,9 +18,12 @@ import {
 } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import ControlledSelect from "./ControlledSelect";
+import { Paperclip } from "lucide-react";
+import FileUploadButton from "./FileUpload";
+import { Tooltip, TooltipContent } from "@radix-ui/react-tooltip";
+import { TooltipTrigger } from "./ui/tooltip";
 
-const buttonStyle =
-  "hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900";
+const buttonStyle = "hover:cursor-pointer";
 
 interface ChatProps {
   id: string;
@@ -28,6 +32,7 @@ interface ChatProps {
 
 export default function Chat({ id, initialMessages }: ChatProps) {
   const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const [files, setFiles] = useState<FileList | undefined>(undefined);
 
   const {
     messages,
@@ -134,7 +139,10 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
-                              className="absolute -top-4 right-1"
+                              className={clsx(
+                                buttonStyle,
+                                "absolute -top-4 right-1",
+                              )}
                               variant="ghost"
                             >
                               ...
@@ -155,7 +163,23 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                           {message.role === "user" ? "User " : "AI "}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>{part.text}</CardContent>
+                      <CardContent>
+                        {part.text}
+                        {message?.experimental_attachments
+                          ?.filter((attachment) =>
+                            attachment?.contentType?.startsWith("image/"),
+                          )
+                          .map((attachment, index) => (
+                            <Image
+                              key={`${message.id}-${index}`}
+                              src={attachment.url}
+                              width={500}
+                              height={500}
+                              alt={attachment.name ?? `attachment-${index}`}
+                              className={"pt-2"}
+                            />
+                          ))}
+                      </CardContent>
                     </Card>
                   );
                 case "tool-invocation":
@@ -182,9 +206,22 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       </ScrollArea>
       {/* Input form fixed at the bottom */}
       <form
-        onSubmit={handleSubmit}
         className="mt-4 flex w-2xl space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl shadow-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:shadow-zinc-950"
+        onSubmit={(event) => {
+          handleSubmit(event, {
+            experimental_attachments: files,
+          });
+
+          setFiles(undefined);
+        }}
       >
+        {files && files.length > 0 && (
+          <div className="text-muted-foreground flex items-center gap-1 pl-2 text-sm">
+            <Paperclip className="h-4 w-4" />
+            <span>{files.length}</span>
+          </div>
+        )}
+        <FileUploadButton onFilesSelected={setFiles} />
         <Input
           type="text"
           value={input}
@@ -197,7 +234,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         <Button
           type="submit"
           variant="ghost"
-          disabled={status === "submitted"}
+          disabled={status === "submitted" || input.length === 0}
           className={buttonStyle}
         >
           {status === "submitted" ? <Spinner size="small" /> : "Send"}
