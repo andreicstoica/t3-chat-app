@@ -144,23 +144,25 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         )}
         <div ref={messagesEndRef} />
       </ScrollArea>
-      {/* Input form fixed at the bottom flex-col flow */}
+      {/* Input form fixed at the bottom */}
       <form
         onSubmit={handleSubmit}
-        className="mt-4 flex w-full justify-between space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+        className="dark:shadow-zinc-960 mt-4 flex w-full justify-between space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl shadow-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:shadow-zinc-950"
       >
         <Input
           type="text"
           value={input}
           onChange={handleInputChange}
-          placeholder="How can I help?"
+          placeholder={
+            status === "submitted" ? "Loading..." : "How can I help?"
+          }
           disabled={status === "submitted"}
         />
         <Button
           type="submit"
           variant="ghost"
           disabled={status === "submitted"}
-          className="hover:cursor-pointer hover:bg-zinc-200"
+          className="hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900"
         >
           {status === "submitted" ? <Spinner size="small" /> : "Send"}
         </Button>
