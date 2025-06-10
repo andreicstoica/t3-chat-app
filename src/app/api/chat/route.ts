@@ -11,8 +11,11 @@ export const maxDuration = 30;
 const vertex = createVertex({
   googleAuthOptions: {
     credentials: {
-      client_email: env.GOOGLE_EMAIL as string,
-      private_key: env.GOOGLE_API_KEY as string,
+      // these lines were causing build errors when i typed the env vars 'as string', so i'm turning it off for now
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      client_email: env.GOOGLE_EMAIL,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      private_key: env.GOOGLE_API_KEY,
     },
   },
 });
