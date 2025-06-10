@@ -34,7 +34,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     handleSubmit,
     error,
     reload,
-    stop,
+    //stop,
     status,
   } = useChat({
     id: id,
