@@ -1,24 +1,11 @@
 // ~/app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai';
-import { createVertex } from '@ai-sdk/google-vertex'
+import { google } from '@ai-sdk/google';
 import { appendClientMessage, createIdGenerator, streamText, tool, type Message } from 'ai';
 import { z } from 'zod';
 import { getChatMessages } from '~/tools/chat-store';
-import { env } from "~/env";
 
 export const maxDuration = 30;
-
-const vertex = createVertex({
-  googleAuthOptions: {
-    credentials: {
-      // these lines were causing build errors when i typed the env vars 'as string', so i'm turning it off for now
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      client_email: env.GOOGLE_EMAIL,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      private_key: env.GOOGLE_API_KEY,
-    },
-  },
-});
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +25,8 @@ export async function POST(req: Request) {
     if (selectedModel === "gpt-4o-mini") {
       chosenModel = openai('gpt-4o-mini');
     } else if (selectedModel === "gemini-2.5") {
-      chosenModel = vertex('gemini-2.5-flash-preview-05-20');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      chosenModel = google('gemini-2.0-flash');
     } else {
       // FALLBACK in case model is passing incorrectly 
       chosenModel = openai('gpt-4o-mini');
@@ -53,6 +41,7 @@ export async function POST(req: Request) {
         prefix: 'msgs',
         size: 16,
       }),
+      onError: (error) => console.log(error),
       tools: {
         weather: tool({
           description: 'Get the weather in a location (fahrenheit)',
@@ -70,7 +59,6 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log(result);
     return result.toDataStreamResponse({
       getErrorMessage: (error) => {
         if (error == null) {

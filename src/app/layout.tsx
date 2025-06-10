@@ -7,8 +7,8 @@ import { ThemeProvider } from "~/components/theme-provider";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Tarot Reading Chat App",
-  description: "A tarot reading AI chat app",
+  title: "ACS Chat App",
+  description: "A template AI chat app to learn NextJS's AI API",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

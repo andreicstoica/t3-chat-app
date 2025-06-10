@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
-import { index, pgTableCreator } from "drizzle-orm/pg-core";
+import { index, pgTable, pgTableCreator, text, varchar, vector } from "drizzle-orm/pg-core";
 import { type Message } from "ai"; 
+
+import { nanoid } from "~/lib/utils"
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -42,4 +44,23 @@ export const posts = createTable(
     updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
   }),
   (t) => [index("name_idx").on(t.name)],
+);
+
+export const embeddings = pgTable('embeddings', {
+    id: varchar('id', { length: 191 })
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
+    resourceId: varchar('id', { length: 256 }).references(
+      () => posts.id,
+      { onDelete: 'cascade' },
+    ),
+    content: text('content').notNull(),
+    embedding: vector('embedding', { dimensions: 1536 }).notNull(),
+  },
+  table => ({
+    embeddingIndex: index('embeddingIndex').using(
+      'hnsw',
+      table.embedding.op('vector_cosine_ops'),
+    ),
+  }),
 );
