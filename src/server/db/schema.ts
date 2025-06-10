@@ -1,8 +1,6 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
 import { sql } from "drizzle-orm";
 import { index, pgTableCreator } from "drizzle-orm/pg-core";
+import { type Message } from "ai"; 
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -10,9 +8,8 @@ import { index, pgTableCreator } from "drizzle-orm/pg-core";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `t3-chat-app_${name}`);
+export const createTable = pgTableCreator((name) => `t3-chat-app_${name}`); 
 
-import { type Message } from "ai";
 type Messages = Message[]
 
 export const chats = createTable(
@@ -31,7 +28,7 @@ export const chats = createTable(
     .default([]),
   }),
   (t) => [index("chat_name_idx").on(t.name)]
-)
+);
 
 export const posts = createTable(
   "post",
