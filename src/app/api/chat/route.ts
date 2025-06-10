@@ -1,7 +1,6 @@
 // ~/app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai';
 import { createVertex } from '@ai-sdk/google-vertex'
-//import { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'; // Note: importing from @ai-sdk/google
 import { appendClientMessage, createIdGenerator, streamText, tool, type Message } from 'ai';
 import { z } from 'zod';
 import { getChatMessages } from '~/tools/chat-store';
@@ -17,7 +16,6 @@ const vertex = createVertex({
     },
   },
 });
-
 
 export async function POST(req: Request) {
   try {
@@ -68,7 +66,7 @@ export async function POST(req: Request) {
         }),
       },
     });
-    
+
     console.log(result);
     return result.toDataStreamResponse({
       getErrorMessage: (error) => {
