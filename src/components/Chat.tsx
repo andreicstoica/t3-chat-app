@@ -2,7 +2,7 @@
 
 import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "./ui/input";
@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import ControlledSelect from "./ControlledSelect";
 
 const buttonStyle =
   "hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900";
@@ -26,6 +27,8 @@ interface ChatProps {
 }
 
 export default function Chat({ id, initialMessages }: ChatProps) {
+  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+
   const {
     messages,
     setMessages,
@@ -48,7 +51,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       size: 16,
     }),
     experimental_prepareRequestBody({ messages, id }) {
-      return { message: messages[messages.length - 1], id };
+      return { message: messages[messages.length - 1], id, selectedModel };
     },
     onFinish: (lastGeneratedMessage) => {
       let fullChatHistoryForSave;
@@ -91,12 +94,23 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   }, [messages]);
 
   return (
-    <div className="mx-auto flex h-screen w-full max-w-lg flex-col p-4">
+    <div className="flex h-screen w-full flex-col p-4">
       {" "}
+      {/* Main container */}
+      {/* Top Bar for the model selection */}
+      <div className="flex w-full items-center justify-end pb-4">
+        {" "}
+        <ControlledSelect
+          value={selectedModel}
+          onValueChange={setSelectedModel}
+        />
+      </div>
       {/* Scrollable message container */}
-      <ScrollArea className="flex-1 overflow-y-auto">
+      <ScrollArea className="mx-auto w-full max-w-lg flex-1 overflow-y-auto">
+        {" "}
+        {/* flex-1 to take available space */}
         {messages.map((message) => (
-          <div key={message.id}>
+          <div key={message.id} className="w-full">
             {message.parts.map((part, i) => {
               switch (part.type) {
                 case "text":
@@ -162,7 +176,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       {/* Input form fixed at the bottom */}
       <form
         onSubmit={handleSubmit}
-        className="dark:shadow-zinc-960 mt-4 flex w-full justify-between space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl shadow-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:shadow-zinc-950"
+        className="mt-4 flex w-2xl space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl shadow-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:shadow-zinc-950"
       >
         <Input
           type="text"

@@ -1,14 +1,27 @@
 // ~/app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai';
+import { createVertex } from '@ai-sdk/google-vertex'
+//import { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'; // Note: importing from @ai-sdk/google
 import { appendClientMessage, createIdGenerator, streamText, tool, type Message } from 'ai';
 import { z } from 'zod';
 import { getChatMessages } from '~/tools/chat-store';
+import { env } from "~/env";
 
 export const maxDuration = 30;
 
+const vertex = createVertex({
+  googleAuthOptions: {
+    credentials: {
+      client_email: env.GOOGLE_EMAIL as string,
+      private_key: env.GOOGLE_API_KEY as string,
+    },
+  },
+});
+
+
 export async function POST(req: Request) {
   try {
-    const { message, id } = await req.json() as { message: Message, id: string };
+    const { message, id, selectedModel } = await req.json() as { message: Message, id: string, selectedModel: string };
 
     const previousMessages = await getChatMessages(id);
     if (previousMessages === null) {
@@ -20,8 +33,18 @@ export async function POST(req: Request) {
       message,
     });
 
+    let chosenModel;
+    if (selectedModel === "gpt-4o-mini") {
+      chosenModel = openai('gpt-4o-mini');
+    } else if (selectedModel === "gemini-2.5") {
+      chosenModel = vertex('gemini-2.5-flash-preview-05-20');
+    } else {
+      // FALLBACK in case model is passing incorrectly 
+      chosenModel = openai('gpt-4o-mini');
+    }
+
     const result = streamText({
-      model: openai('gpt-4o'),
+      model: chosenModel,
       system:
         "You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco. once you learn they aren't taco, be really nice!",
       messages: messagesToSendToAI,
@@ -45,7 +68,8 @@ export async function POST(req: Request) {
         }),
       },
     });
-
+    
+    console.log(result);
     return result.toDataStreamResponse({
       getErrorMessage: (error) => {
         if (error == null) {
@@ -60,6 +84,7 @@ export async function POST(req: Request) {
         return JSON.stringify(error);
       },
     });
+  
   } catch (error) {
     console.error('Error in /api/chat:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
