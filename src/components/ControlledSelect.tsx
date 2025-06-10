@@ -24,7 +24,7 @@ function ControlledSelect({ value, onValueChange }: ControlledSelectProps) {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Model</SelectLabel>
-          <SelectItem value="gemini-2.5">Gemini 2.5 Flash Preview</SelectItem>
+          <SelectItem value="gemini-2.0-flash">Gemini 2.0 Flash</SelectItem>
           <SelectItem value="gpt-4o-mini">gpt4o-mini</SelectItem>
         </SelectGroup>
       </SelectContent>

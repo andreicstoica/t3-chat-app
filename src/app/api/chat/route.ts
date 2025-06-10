@@ -24,8 +24,8 @@ export async function POST(req: Request) {
     let chosenModel;
     if (selectedModel === "gpt-4o-mini") {
       chosenModel = openai('gpt-4o-mini');
-    } else if (selectedModel === "gemini-2.5") {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    } else if (selectedModel === "gemini-2.0-flash") {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       chosenModel = google('gemini-2.0-flash');
     } else {
       // FALLBACK in case model is passing incorrectly 
