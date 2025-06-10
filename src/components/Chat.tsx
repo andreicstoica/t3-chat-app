@@ -10,6 +10,12 @@ import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Spinner } from "./ui/spinner";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import clsx from "clsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 
 const buttonStyle =
   "hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900";
@@ -104,12 +110,26 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                       key={`${message.id}-${i}`}
                     >
                       <CardHeader className="relative">
-                        <Button
-                          className="absolute -top-4 right-1"
-                          variant="ghost"
-                        >
-                          ...
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              className="absolute -top-4 right-1"
+                              variant="ghost"
+                            >
+                              ...
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-5" align="center">
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(message.id)}
+                            >
+                              delete
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => reload()}>
+                              retry
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         <CardTitle>
                           {message.role === "user" ? "User " : "AI "}
                         </CardTitle>
