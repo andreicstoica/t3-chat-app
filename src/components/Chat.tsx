@@ -51,7 +51,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       size: 16,
     }),
     experimental_prepareRequestBody({ messages, id }) {
-      return { message: messages[messages.length - 1], id, selectedModel };
+      return { message: messages[messages.length - 1], id };
     },
     onFinish: (lastGeneratedMessage) => {
       let fullChatHistoryForSave;
@@ -81,8 +81,15 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     },
   });
 
-  const handleDelete = (id: string) => {
-    setMessages(messages.filter((message) => message.id !== id));
+  const handleDelete = (messageId: string) => {
+    const newMessages = messages.filter((message) => message.id !== messageId);
+    setMessages(newMessages);
+    console.log(newMessages);
+    void fetch("/api/save-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, messages: newMessages }),
+    });
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
