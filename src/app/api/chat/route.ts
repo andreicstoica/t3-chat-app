@@ -1,7 +1,7 @@
 // ~/app/api/chat/route.ts
 import { openai } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
-import { appendClientMessage, createIdGenerator, streamText, tool, type Message } from 'ai';
+import { appendClientMessage, createIdGenerator, streamText, tool, type LanguageModelV1, type Message } from 'ai';
 import { z } from 'zod';
 import { getChatMessages } from '~/tools/chat-store';
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       message,
     });
 
-    let chosenModel;
+    let chosenModel: LanguageModelV1;
     if (selectedModel === "gpt-4o-mini") {
       chosenModel = openai('gpt-4o-mini');
     } else if (selectedModel === "gemini-2.0-flash") {
