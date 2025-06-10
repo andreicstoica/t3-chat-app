@@ -8,9 +8,10 @@ import clsx from "clsx";
 import { Button } from "~/components/ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { Spinner } from "./ui/spinner";
 
 const chatStyle =
-  "whitespace-pre-wrap p-4 rounded border border-zinc-300 focus:outline-none dark:border-zinc-700 mb-2";
+  "whitespace-pre-wrap p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 mb-2";
 
 interface ChatProps {
   id: string;
@@ -153,14 +154,15 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           value={input}
           onChange={handleInputChange}
           placeholder="How can I help?"
-          disabled={error != null}
+          disabled={status === "submitted"}
         />
         <Button
           type="submit"
           variant="ghost"
+          disabled={status === "submitted"}
           className="hover:cursor-pointer hover:bg-zinc-200"
         >
-          Send
+          {status === "submitted" ? <Spinner size="small" /> : "Send"}
         </Button>
       </form>
     </div>
