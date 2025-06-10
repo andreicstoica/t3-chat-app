@@ -4,14 +4,15 @@ import { useChat, type Message } from "@ai-sdk/react";
 import { createIdGenerator } from "ai";
 import { useEffect, useRef } from "react";
 
-import clsx from "clsx";
 import { Button } from "~/components/ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Spinner } from "./ui/spinner";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import clsx from "clsx";
 
-const chatStyle =
-  "whitespace-pre-wrap p-4 rounded-lg border border-zinc-300 dark:border-zinc-700 mb-2";
+const buttonStyle =
+  "hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900";
 
 interface ChatProps {
   id: string;
@@ -89,38 +90,32 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       {/* Scrollable message container */}
       <ScrollArea className="flex-1 overflow-y-auto">
         {messages.map((message) => (
-          <div key={message.id} className={chatStyle}>
+          <div key={message.id}>
             {message.parts.map((part, i) => {
               switch (part.type) {
                 case "text":
                   return (
-                    <div key={`${message.id}-${i}`}>
-                      <span className="font-bold">
-                        {message.role === "user" ? "User: " : "AI: "}
-                      </span>
-                      {part.text}{" "}
-                      <div>
-                        <button onClick={() => handleDelete(message.id)}>
-                          {"click to: "}
-                          delete
-                        </button>
-                        <button
-                          onClick={() => stop()}
-                          className={clsx({ hidden: message.role === "user" })}
+                    <Card
+                      className={clsx(
+                        message.role === "user" &&
+                          "bg-slate-200 dark:bg-slate-800",
+                        "mb-2 w-full",
+                      )}
+                      key={`${message.id}-${i}`}
+                    >
+                      <CardHeader className="relative">
+                        <Button
+                          className="absolute -top-4 right-1"
+                          variant="ghost"
                         >
-                          {"--"}
-                          stop
-                        </button>
-                        <button
-                          onClick={() => reload()}
-                          disabled={!(status === "ready" || status === "error")}
-                          className={clsx({ hidden: message.role === "user" })}
-                        >
-                          {"--"}
-                          reload
-                        </button>
-                      </div>
-                    </div>
+                          ...
+                        </Button>
+                        <CardTitle>
+                          {message.role === "user" ? "User " : "AI "}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>{part.text}</CardContent>
+                    </Card>
                   );
                 case "tool-invocation":
                   return (
@@ -137,9 +132,9 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         {error && (
           <div className="mt-4">
             <div>An error occurred.</div>
-            <button type="button" onClick={() => reload()}>
+            <Button type="button" onClick={() => reload()}>
               Retry
-            </button>
+            </Button>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -162,7 +157,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           type="submit"
           variant="ghost"
           disabled={status === "submitted"}
-          className="hover:cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-900"
+          className={buttonStyle}
         >
           {status === "submitted" ? <Spinner size="small" /> : "Send"}
         </Button>
