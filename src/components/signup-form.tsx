@@ -68,10 +68,10 @@ export function SignupForm({
     );
 
     if (success) {
-      toast.success(message as string);
-      router.push("/dashboard");
+      toast.success(message);
+      router.push("/chat");
     } else {
-      toast.error(message as string);
+      toast.error(message);
     }
 
     setIsLoading(false);

@@ -62,10 +62,10 @@ export function SigninForm({
     const { success, message } = await signIn(values.email, values.password);
 
     if (success) {
-      toast.success(message as string);
-      router.push("/dashboard");
+      toast.success(message);
+      router.push("/chat");
     } else {
-      toast.error(message as string);
+      toast.error(message);
     }
 
     setIsLoading(false);
