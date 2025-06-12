@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 
-export default async function Home() {
+export default function Home() {
   //TODO need to work on this later -> make sure that the session is authenticated properly
   // and then pass the context down to chat. currently this runs every 2/3 ms! :D
   /*
