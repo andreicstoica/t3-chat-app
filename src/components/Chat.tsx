@@ -20,8 +20,6 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import ControlledSelect from "./ControlledSelect";
 import { Paperclip } from "lucide-react";
 import FileUploadButton from "./FileUpload";
-import { Tooltip, TooltipContent } from "@radix-ui/react-tooltip";
-import { TooltipTrigger } from "./ui/tooltip";
 
 const buttonStyle = "hover:cursor-pointer";
 
