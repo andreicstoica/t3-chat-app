@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
 import { appendClientMessage, createIdGenerator, streamText, tool, type LanguageModelV1, type Message } from 'ai';
 import { z } from 'zod';
-import { getChatMessages } from '~/tools/chat-store';
+import { getChatMessages } from '~/lib/chat-store';
 
 export const maxDuration = 30;
 

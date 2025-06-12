@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation";
+import Home from "~/components/Home";
 
 export default async function Page() {
-  // need to make login page then redirect :)
-  redirect(`/chat`); // redirect to chat page, see below
+  return <Home />;
 }
