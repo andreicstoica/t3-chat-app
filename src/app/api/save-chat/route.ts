@@ -1,5 +1,5 @@
 // app/api/save-chat/route.ts
-import { saveChatMessages } from '~/tools/chat-store';
+import { saveChatMessages } from '~/lib/chat-store';
 import type { Message } from 'ai'; 
 
 export const maxDuration = 10; 

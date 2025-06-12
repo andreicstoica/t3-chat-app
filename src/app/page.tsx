@@ -1,6 +1,16 @@
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { Logout } from "~/components/logout";
 
 export default async function Page() {
-  // need to make login page then redirect :)
-  redirect(`/chat`); // redirect to chat page, see below
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("better-auth.session_token");
+
+  return (
+    <div className="flex justify-end">
+      {sessionCookie ? <Logout /> : <Link href="/signin">Login</Link>}
+    </div>
+  );
+
+  //return <Home />;
 }
