@@ -1,6 +1,5 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
-import Home from "~/components/Home";
 import { Logout } from "~/components/logout";
 
 export default async function Page() {

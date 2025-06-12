@@ -1,7 +1,6 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import { authClient } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 
 export default function Home() {
