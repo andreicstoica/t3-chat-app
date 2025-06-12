@@ -25,7 +25,6 @@ export async function POST(req: Request) {
     if (selectedModel === "gpt-4o-mini") {
       chosenModel = openai('gpt-4o-mini');
     } else if (selectedModel === "gemini-2.0-flash") {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       chosenModel = google('gemini-2.0-flash');
     } else {
       // FALLBACK in case model is passing incorrectly 
@@ -35,7 +34,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: chosenModel,
       system:
-        "You are a helpful assistant... only respond with one short sentence, and make sure you are mean to anyone named Taco. once you learn they aren't taco, be really nice!",
+        "You are a helpful assistant. Be succinct and to the point. Be really nice to anyone named Lily. Help her reflect on her tarot readings, especially when trends emerge over time!",
       messages: messagesToSendToAI,
       experimental_generateMessageId: createIdGenerator({
         prefix: 'msgs',
