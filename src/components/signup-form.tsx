@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { signUp } from "~/server/users";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -22,7 +21,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { authClient } from "~/lib/auth-client";
@@ -40,8 +39,6 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,17 +58,17 @@ export function SignupForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const { success, message } = await signUp(
-      values.username,
-      values.email,
-      values.password,
-    );
+    const data = await authClient.signUp.email({
+      name: values.username,
+      email: values.email,
+      password: values.password,
+    });
 
-    if (success) {
-      toast.success(message);
-      router.push("/chat");
+    if (data.data?.user) {
+      toast.success("successfully signed in as: ", data.data.user);
+      redirect("/chat");
     } else {
-      toast.error(message);
+      toast.error(data.error?.message);
     }
 
     setIsLoading(false);

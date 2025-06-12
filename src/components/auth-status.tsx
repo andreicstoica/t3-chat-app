@@ -3,10 +3,12 @@
 import { useSession, signOut } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
 import { LogOut, User } from "lucide-react";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export function AuthStatus() {
   const { data: session, isPending } = useSession();
+
+  console.log(session);
 
   if (isPending) {
     return (
@@ -20,14 +22,11 @@ export function AuthStatus() {
   if (!session?.user) {
     return (
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => redirect("/signin")}
-          className="gap-2"
-        >
-          Sign in
-        </Button>
+        <Link href="/signin">
+          <Button variant="outline" size="sm" className="gap-2">
+            Sign in
+          </Button>
+        </Link>
       </div>
     );
   }
