@@ -104,7 +104,8 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   }, [messages]);
 
   return (
-    <div className="flex h-screen w-full flex-col p-4">
+    <div className="flex h-full w-full flex-col p-4">
+      <div className="mt-16" /> {/* This is the height of the auth status bar */}
       {" "}
       {/* Main container */}
       {/* Top Bar for the model selection */}
@@ -128,7 +129,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                     <Card
                       className={clsx(
                         message.role === "user" &&
-                          "bg-slate-200 dark:bg-slate-800",
+                        "bg-slate-200 dark:bg-slate-800",
                         "mb-2 w-full",
                       )}
                       key={`${message.id}-${i}`}

@@ -4,11 +4,41 @@ import { google } from '@ai-sdk/google';
 import { appendClientMessage, createIdGenerator, streamText, tool, type LanguageModelV1, type Message } from 'ai';
 import { z } from 'zod';
 import { getChatMessages } from '~/tools/chat-store';
+import { auth } from '~/lib/auth';
+import { headers } from 'next/headers';
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
+
+
   try {
+    // Get user authentication status
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      console.log("User not authenticated, redirecting to login");
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    }
+
+    // Log authentication status
+    console.log('=== CHAT REQUEST AUTH STATUS ===');
+    if (session?.user) {
+      console.log('✅ User authenticated:', {
+        userId: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      console.log('❌ User not authenticated', {
+        timestamp: new Date().toISOString(),
+      });
+    }
+    console.log('==================================');
+
     const { message, id, selectedModel } = await req.json() as { message: Message, id: string, selectedModel: string };
 
     const previousMessages = await getChatMessages(id);
@@ -72,7 +102,7 @@ export async function POST(req: Request) {
         return JSON.stringify(error);
       },
     });
-  
+
   } catch (error) {
     console.error('Error in /api/chat:', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
