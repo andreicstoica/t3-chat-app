@@ -16,7 +16,7 @@ export default function ChatSidebar({
   currentChatId: string;
 }) {
   return (
-    <div className="h-full w-64 overflow-y-auto border-r">
+    <div className="h-full w-64 overflow-hidden overflow-y-auto border-r">
       {/* TODO add a new chat button here later */}
 
       {chats.map((chat) => (

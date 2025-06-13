@@ -18,7 +18,7 @@ export default function ChatPageContainer({
   initialMessages,
 }: ChatPageContainerProps) {
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full border-2 border-red-500">
       <ChatSidebar chats={chats} currentChatId={currentChatId} />
       <Chat id={currentChatId} initialMessages={initialMessages} />
     </div>

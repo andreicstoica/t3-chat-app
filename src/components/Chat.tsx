@@ -104,7 +104,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   }, [messages]);
 
   return (
-    <div className="flex h-screen w-full flex-col p-4">
+    <div className="flex h-full w-full flex-col border-2 border-blue-500 p-4">
       {" "}
       {/* Main container */}
       {/* Top Bar for the model selection */}
@@ -116,92 +116,94 @@ export default function Chat({ id, initialMessages }: ChatProps) {
         />
       </div>
       {/* Scrollable message container */}
-      <ScrollArea className="mx-auto w-full max-w-lg flex-1 overflow-y-auto">
-        {" "}
-        {/* flex-1 to take available space */}
-        {messages.map((message) => (
-          <div key={message.id} className="w-full">
-            {message.parts.map((part, i) => {
-              switch (part.type) {
-                case "text":
-                  return (
-                    <Card
-                      className={clsx(
-                        message.role === "user" &&
-                          "bg-slate-200 dark:bg-slate-800",
-                        "mb-2 w-full",
-                      )}
-                      key={`${message.id}-${i}`}
-                    >
-                      <CardHeader className="relative">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              className={clsx(
-                                buttonStyle,
-                                "absolute -top-4 right-1",
-                              )}
-                              variant="ghost"
-                            >
-                              ...
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent className="w-5" align="center">
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(message.id)}
-                            >
-                              delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => reload()}>
-                              retry
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <CardTitle>
-                          {message.role === "user" ? "User " : "AI "}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {part.text}
-                        {message?.experimental_attachments
-                          ?.filter((attachment) =>
-                            attachment?.contentType?.startsWith("image/"),
-                          )
-                          .map((attachment, index) => (
-                            <Image
-                              key={`${message.id}-${index}`}
-                              src={attachment.url}
-                              width={500}
-                              height={500}
-                              alt={attachment.name ?? `attachment-${index}`}
-                              className={"pt-2"}
-                            />
-                          ))}
-                      </CardContent>
-                    </Card>
-                  );
-                case "tool-invocation":
-                  return (
-                    <pre key={`${message.id}-${i}`}>
-                      {JSON.stringify(part.toolInvocation, null, 2)}
-                    </pre>
-                  );
-                default:
-                  return null;
-              }
-            })}
-          </div>
-        ))}
-        {error && (
-          <div className="mt-4">
-            <div>An error occurred.</div>
-            <Button type="button" onClick={() => reload()}>
-              Retry
-            </Button>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </ScrollArea>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <ScrollArea className="mx-auto h-full w-full max-w-lg flex-1 border-2 border-green-500">
+          {" "}
+          {/* flex-1 to take available space */}
+          {messages.map((message) => (
+            <div key={message.id} className="w-full">
+              {message.parts.map((part, i) => {
+                switch (part.type) {
+                  case "text":
+                    return (
+                      <Card
+                        className={clsx(
+                          message.role === "user" &&
+                            "bg-slate-200 dark:bg-slate-800",
+                          "mb-2 w-full",
+                        )}
+                        key={`${message.id}-${i}`}
+                      >
+                        <CardHeader className="relative">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                className={clsx(
+                                  buttonStyle,
+                                  "absolute -top-4 right-1",
+                                )}
+                                variant="ghost"
+                              >
+                                ...
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-5" align="center">
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(message.id)}
+                              >
+                                delete
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => reload()}>
+                                retry
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <CardTitle>
+                            {message.role === "user" ? "User " : "AI "}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {part.text}
+                          {message?.experimental_attachments
+                            ?.filter((attachment) =>
+                              attachment?.contentType?.startsWith("image/"),
+                            )
+                            .map((attachment, index) => (
+                              <Image
+                                key={`${message.id}-${index}`}
+                                src={attachment.url}
+                                width={500}
+                                height={500}
+                                alt={attachment.name ?? `attachment-${index}`}
+                                className={"pt-2"}
+                              />
+                            ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  case "tool-invocation":
+                    return (
+                      <pre key={`${message.id}-${i}`}>
+                        {JSON.stringify(part.toolInvocation, null, 2)}
+                      </pre>
+                    );
+                  default:
+                    return null;
+                }
+              })}
+            </div>
+          ))}
+          {error && (
+            <div className="mt-4">
+              <div>An error occurred.</div>
+              <Button type="button" onClick={() => reload()}>
+                Retry
+              </Button>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </ScrollArea>
+      </div>
       {/* Input form fixed at the bottom */}
       <form
         className="mt-4 flex w-2xl space-x-1.5 self-center rounded-xl border border-zinc-300 p-2 shadow-xl shadow-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:shadow-zinc-950"
