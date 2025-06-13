@@ -2,14 +2,24 @@ import { generateId, type Message } from 'ai';
 import { db } from '~/server/db';
 import { chats } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { getSession } from './auth-client';
 
 export async function createChat(): Promise<string> {
-const id = generateId(); // generate a unique chat ID
+  const id = generateId(); // generate a unique chat ID
   console.log(`[createChat] Attempting to create new chat with ID: ${id}`);
   console.log(`[createChat] Chat name: New chat id: ${id}`);
+
+  const userSession = await getSession();
+  const userId = userSession.data?.user.id;
+
+  if (!userId) {
+    throw new Error('no userId')
+  }
+
   try {
     const insertedRows = await db.insert(chats).values({
       id: id,
+      userId: userId,
       name: `New chat id: ${id}`,
       // messages column will default to []
     }).returning({ id: chats.id }); 

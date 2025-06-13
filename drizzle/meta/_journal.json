@@ -15,6 +15,13 @@
       "when": 1749509915011,
       "tag": "0001_pale_medusa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749823546050,
+      "tag": "0002_fancy_crystal",
+      "breakpoints": true
     }
   ]
 }
