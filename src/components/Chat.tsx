@@ -104,7 +104,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   }, [messages]);
 
   return (
-    <div className="flex h-full w-full flex-col border-2 border-blue-500 p-4">
+    <div className="flex h-full max-h-[calc(100%-160px)] w-full flex-col border-2 border-blue-500 p-4">
       {" "}
       {/* Main container */}
       {/* Top Bar for the model selection */}
