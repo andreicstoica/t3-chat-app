@@ -8,7 +8,7 @@ export default async function Page() {
 
   return (
     <div className="flex justify-end">
-      {sessionCookie ? <Logout /> : <Link href="/signin">Login</Link>}
+      {sessionCookie ? <Logout /> : <Link href="/signin">Sign in</Link>}
     </div>
   );
 

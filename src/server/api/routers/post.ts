@@ -2,15 +2,14 @@ import { z } from "zod";
 
 import { desc } from 'drizzle-orm';
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import { posts } from "~/server/db/schema";
 
 export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
+  hello: protectedProcedure
+    .query(({ ctx }) => {
       return {
-        greeting: `Hello ${input.text}`,
+        greeting: `Hello ${ctx.user.name}`,
       };
     }),
 

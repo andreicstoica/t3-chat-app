@@ -12,7 +12,7 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { db } from "~/server/db";
-import { getSession } from '~/lib/auth-client';
+import { auth } from "~/lib/auth";
 
 /**
  * 1. CONTEXT
@@ -27,10 +27,11 @@ import { getSession } from '~/lib/auth-client';
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getSession();
+  const authSession = await auth.api.getSession({headers:opts.headers})
+  console.log("session object on server:", authSession);
   return {
     db,
-    session,
+    user: authSession?.user,
     ...opts,
   };
 };
@@ -101,14 +102,14 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 const sessionValidatorMiddleware = t.middleware(async ({ next, ctx }) => {
-  if (!ctx.session.data?.user.id) {
+  if (!ctx.user?.id) {
     throw new TRPCError({ code: "UNAUTHORIZED"})
   }
 
   return next({
     ctx: {
       ...ctx,
-      user: ctx.session.data.user,
+      user: ctx.user,
     }
   })
 })
@@ -121,4 +122,4 @@ const sessionValidatorMiddleware = t.middleware(async ({ next, ctx }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
-export const protectedProcedure = t.procedure.use(sessionValidatorMiddleware)
+export const protectedProcedure = t.procedure.use(timingMiddleware).use(sessionValidatorMiddleware);

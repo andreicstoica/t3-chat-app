@@ -2,14 +2,18 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { chatRouter } from "~/server/api/routers/chat";
+import { api } from "~/trpc/react";
 
-export default function ChatSidebar(currentChatId: string) {
-  const chats = chatRouter.list.useQuery();
+interface ChatSidebarProps {
+  currentChatId: string;
+}
+
+export default function ChatSidebar({ currentChatId }: ChatSidebarProps) {
+  const { data: chats, isLoading, error } = api.chat.list.useQuery();
 
   return (
     <div className="h-full w-64 overflow-y-auto border-r">
-      {chats.map((chat) => (
+      {chats?.map((chat) => (
         <Link
           key={chat.id}
           href={`/chat/${chat.id}`}
