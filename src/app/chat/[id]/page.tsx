@@ -1,10 +1,19 @@
-import { getChatMessages } from "~/lib/chat-store";
+// In app/chat/[id]/page.tsx
+import { api } from "~/trpc/server";
 import ChatPageContainer from "~/components/ChatPageContainer";
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const { id } = await props.params; // get the chat ID from the URL
-  const messages = await getChatMessages(id); // load the chat messages
+export default async function Page({ params }: { params: { id: string } }) {
+  // Fetch everything needed for the page on the server, in parallel.
+  const [chatList, currentChat] = await Promise.all([
+    api.chat.list(),
+    api.chat.get({ chatId: params.id }),
+  ]);
+
   return (
-    <ChatPageContainer currentChatId={id} initialMessages={messages ?? []} />
-  ); // display the chat
+    <ChatPageContainer
+      chats={chatList}
+      currentChatId={currentChat.id}
+      initialMessages={currentChat.messages ?? []}
+    />
+  );
 }

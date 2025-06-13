@@ -2,14 +2,15 @@ import { generateId, type Message } from 'ai';
 import { db } from '~/server/db';
 import { chats } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
-import { auth } from "~/lib/auth";
-import { headers } from 'next/headers';
+//import { auth } from "~/lib/auth";
+//import { headers } from 'next/headers';
 
-export async function createChat(): Promise<string> {
+export async function createChat({ userId }: { userId: string; }): Promise<string> {
   const id = generateId(); // generate a unique chat ID
   console.log(`[createChat] Attempting to create new chat with ID: ${id}`);
   console.log(`[createChat] Chat name: New chat id: ${id}`);
 
+  /*
   const userSession = await auth.api.getSession({
     headers: await headers()
   });
@@ -18,11 +19,10 @@ export async function createChat(): Promise<string> {
     throw new Error('no userSession')
   }
 
-  const userId = userSession.user.id;
-
   if (!userId) {
     throw new Error('no userId')
   }
+  */
 
   try {
     const insertedRows = await db.insert(chats).values({

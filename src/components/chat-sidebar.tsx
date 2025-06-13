@@ -2,18 +2,24 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-import { api } from "~/trpc/react";
 
-interface ChatSidebarProps {
-  currentChatId: string;
+interface ChatInfo {
+  id: string;
+  name: string;
 }
 
-export default function ChatSidebar({ currentChatId }: ChatSidebarProps) {
-  const { data: chats, isLoading, error } = api.chat.list.useQuery();
-
+export default function ChatSidebar({
+  chats,
+  currentChatId,
+}: {
+  chats: ChatInfo[];
+  currentChatId: string;
+}) {
   return (
     <div className="h-full w-64 overflow-y-auto border-r">
-      {chats?.map((chat) => (
+      {/* TODO add a new chat button here later */}
+
+      {chats.map((chat) => (
         <Link
           key={chat.id}
           href={`/chat/${chat.id}`}
@@ -21,7 +27,7 @@ export default function ChatSidebar({ currentChatId }: ChatSidebarProps) {
             "block p-4",
             chat.id === currentChatId
               ? "bg-gray-100 font-bold"
-              : "bg-gray-400 hover:bg-gray-100",
+              : "hover:bg-gray-100",
           )}
         >
           {chat.name}
