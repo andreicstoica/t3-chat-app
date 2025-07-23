@@ -13,7 +13,11 @@ import { AuthStatus } from "~/components/auth-status";
 export const metadata: Metadata = {
   title: "Daily Tarot",
   description: "Helping people reflect on their draws",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 const geist = Geist({
@@ -35,7 +39,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            <div className="flex h-screen flex-col">
+            <div className="flex h-screen min-h-0 flex-col overflow-hidden">
               {/* Auth Status Bar at the top */}
               <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
                 <div className="flex h-16 items-center justify-between px-4">
@@ -44,7 +48,7 @@ export default function RootLayout({
                 </div>
               </div>
 
-              <main className="flex-1">
+              <main className="min-h-0 flex-1 overflow-hidden">
                 {/* Main Content */}
                 {children}
                 <Toaster />

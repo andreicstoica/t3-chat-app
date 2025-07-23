@@ -2,13 +2,52 @@ import { generateId, type Message } from 'ai';
 import { db } from '~/server/db';
 import { chats } from '~/server/db/schema';
 import { eq } from 'drizzle-orm';
+
+export function getLastMessageContent(message: Message): string {
+  if (!message) return "";
+
+  try {
+    // Handle different message formats
+
+    // First try the content property (common format)
+    if (message.content && typeof message.content === 'string') {
+      return message.content;
+    }
+
+    // Then try parts array (newer format)
+    if (message.parts && Array.isArray(message.parts)) {
+      const textPart = message.parts.find(part => part.type === "text");
+      if (textPart && "text" in textPart) {
+        return textPart.text;
+      }
+    }
+
+    // Fallback: check if content is an array
+    if (Array.isArray(message.content)) {
+      const textContent = message.content.find(item =>
+        typeof item === 'string' || (item && typeof item === 'object' && 'text' in item)
+      );
+      if (typeof textContent === 'string') {
+        return textContent;
+      }
+      if (textContent && typeof textContent === 'object' && 'text' in textContent) {
+        return textContent.text;
+      }
+    }
+
+  } catch (error) {
+    console.error("Error extracting message content:", error);
+  }
+
+  return "";
+}
 //import { auth } from "~/lib/auth";
 //import { headers } from 'next/headers';
 
 export async function createChat({ userId }: { userId: string; }): Promise<string> {
   const id = generateId(); // generate a unique chat ID
   console.log(`[createChat] Attempting to create new chat with ID: ${id}`);
-  console.log(`[createChat] Chat name: New chat id: ${id}`);
+  console.log(`[createChat] Chat name: New conversation`);
 
   /*
   const userSession = await auth.api.getSession({
@@ -28,9 +67,9 @@ export async function createChat({ userId }: { userId: string; }): Promise<strin
     const insertedRows = await db.insert(chats).values({
       id: id,
       userId: userId,
-      name: `New chat id: ${id}`,
+      name: `New conversation`,
       // messages column will default to []
-    }).returning({ id: chats.id }); 
+    }).returning({ id: chats.id });
 
     if (insertedRows.length > 0) {
       console.log(`[createChat] Successfully created chat ID: ${insertedRows[0]?.id}`);
@@ -46,7 +85,7 @@ export async function createChat({ userId }: { userId: string; }): Promise<strin
   }
 }
 
-export async function getChatMessages(id: string): Promise<Message[] > {
+export async function getChatMessages(id: string): Promise<Message[]> {
   const chatRecord = await db.query.chats.findFirst({
     where: eq(chats.id, id),
     columns: {
@@ -66,7 +105,7 @@ export async function saveChatMessages({
   messages: Message[];
 }): Promise<void> {
   try {
-    const updatedRows = await db 
+    const updatedRows = await db
       .update(chats)
       .set({ messages: messages })
       .where(eq(chats.id, id))
@@ -75,16 +114,16 @@ export async function saveChatMessages({
     console.log(`[saveChatMessages] Drizzle update result (updated rows array):`, updatedRows);
 
     // Check the length of the array to see if any rows were updated
-    if (updatedRows.length === 0) { 
-        console.warn(`[saveChatMessages] No rows updated for chat ID: ${id}. Does it exist in the DB?`);
+    if (updatedRows.length === 0) {
+      console.warn(`[saveChatMessages] No rows updated for chat ID: ${id}. Does it exist in the DB?`);
     } else {
-        console.log(`[saveChatMessages] Successfully updated chat ID: ${id}. Updated rows count: ${updatedRows.length}`);
-        console.log(`[saveChatMessages] Updated chat ID: ${updatedRows[0]?.id}`); // Log the ID of the first updated row
-      }
-    } catch (error) {
-      console.error(`[saveChatMessages] Error during Drizzle update for chat ID ${id}:`, error);
+      console.log(`[saveChatMessages] Successfully updated chat ID: ${id}. Updated rows count: ${updatedRows.length}`);
+      console.log(`[saveChatMessages] Updated chat ID: ${updatedRows[0]?.id}`); // Log the ID of the first updated row
     }
+  } catch (error) {
+    console.error(`[saveChatMessages] Error during Drizzle update for chat ID ${id}:`, error);
   }
+}
 
 // in case i want to get whole chat obj
 export async function getChat(id: string) {
