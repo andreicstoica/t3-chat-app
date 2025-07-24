@@ -73,7 +73,7 @@ export function LandingPage() {
                         </Link>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                        Start your tarot journey today - it's free to get started
+                        Start your tarot journey today - free to get started
                     </p>
                 </div>
             </div>
