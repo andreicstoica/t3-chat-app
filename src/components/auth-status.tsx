@@ -41,7 +41,10 @@ export function AuthStatus() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => signOut()}
+        onClick={async () => {
+          await signOut();
+          window.location.href = '/';
+        }}
         className="gap-2"
       >
         <LogOut className="h-4 w-4" />

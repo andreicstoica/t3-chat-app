@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { authClient } from "~/lib/auth-client";
@@ -38,6 +38,7 @@ export function SigninForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,7 +65,7 @@ export function SigninForm({
 
     if (data.data?.user) {
       toast.success("Successfully signed in.");
-      redirect("/chat");
+      router.push("/chat");
     } else {
       toast.error(data.error?.message);
     }

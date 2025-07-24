@@ -1,9 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
 import { SignupForm } from "~/components/signup-form";
 import logo from "~/../public/logo.png";
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
+
+  if (session?.user) {
+    redirect("/chat");
+  }
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
