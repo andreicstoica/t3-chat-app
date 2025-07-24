@@ -13,7 +13,11 @@ import { AuthStatus } from "~/components/auth-status";
 export const metadata: Metadata = {
   title: "Daily Tarot",
   description: "Helping people reflect on their draws",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 const geist = Geist({
@@ -35,25 +39,20 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            {/* Auth Status Bar at the top */}
-            <div className="h-screen max-h-screen">
-              <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 absolute top-0 right-0 left-0 border-b backdrop-blur">
+            <div className="flex h-screen min-h-0 flex-col overflow-hidden">
+              {/* Auth Status Bar at the top */}
+              <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
                 <div className="flex h-16 items-center justify-between px-4">
                   <Image src={logo} alt="logo" width={50} height={50} />
                   <AuthStatus />
                 </div>
               </div>
 
-              {/* Main Content */}
-              {children}
-              <Toaster />
-
-              {/* Optional: Auth status at bottom for mobile */}
-              <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-t backdrop-blur md:hidden">
-                <div className="container flex h-12 items-center justify-center px-4">
-                  <AuthStatus />
-                </div>
-              </div>
+              <main className="min-h-0 flex-1 overflow-hidden">
+                {/* Main Content */}
+                {children}
+                <Toaster />
+              </main>
             </div>
           </TRPCReactProvider>
         </ThemeProvider>

@@ -8,8 +8,6 @@ import Link from "next/link";
 export function AuthStatus() {
   const { data: session, isPending } = useSession();
 
-  console.log(session);
-
   if (isPending) {
     return (
       <div className="text-muted-foreground flex items-center gap-2 text-sm">

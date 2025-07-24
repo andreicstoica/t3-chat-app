@@ -16,6 +16,7 @@ export const chats = createTable(
   "chat",
   (d) => ({
     id: d.varchar({ length: 256 }).primaryKey().notNull(),
+    userId: d.varchar({ length: 256 }).notNull(),
     name: d.varchar({ length: 256 }).notNull(),
     createdAt: d
       .timestamp({ withTimezone: true })

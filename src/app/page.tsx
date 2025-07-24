@@ -1,16 +1,16 @@
-import { cookies } from "next/headers";
-import Link from "next/link";
-import { Logout } from "~/components/logout";
+import { redirect } from "next/navigation";
+import { auth } from "~/lib/auth";
+import { headers } from "next/headers";
 
 export default async function Page() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get("better-auth.session_token");
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
 
-  return (
-    <div className="flex justify-end">
-      {sessionCookie ? <Logout /> : <Link href="/signin">Login</Link>}
-    </div>
-  );
+  if (session?.user) {
+    redirect("/chat");
+  }
 
-  //return <Home />;
+  // If not authenticated, redirect to sign in
+  redirect("/signin");
 }
