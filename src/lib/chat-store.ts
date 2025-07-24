@@ -31,7 +31,7 @@ export function getLastMessageContent(message: Message): string {
         return textContent;
       }
       if (textContent && typeof textContent === 'object' && 'text' in textContent) {
-        return textContent.text;
+        return (textContent as { text: string }).text;
       }
     }
 

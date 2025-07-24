@@ -21,7 +21,7 @@ export const chatRouter = createTRPCRouter({
 
       // Add last message content to each chat
       const chatsWithLastMessage = foundChats.map(chat => {
-        const messages = chat.messages || [];
+        const messages = chat.messages ?? [];
         const lastMessage = messages.length > 0
           ? getLastMessageContent(messages[messages.length - 1]!)
           : null;
@@ -34,11 +34,11 @@ export const chatRouter = createTRPCRouter({
 
         return {
           ...chat,
-          lastMessage: lastMessage || "New conversation",
+          lastMessage: lastMessage ?? "New conversation",
         };
       });
 
-      return chatsWithLastMessage ?? null;
+      return chatsWithLastMessage;
     }),
 
   get: protectedProcedure

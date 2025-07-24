@@ -24,8 +24,8 @@ export default function ChatSidebar({
 
   // 1. Set up the mutation hook BEFORE the return statement
   const createChatMutation = api.chat.create.useMutation({
-    onSuccess: async (newChatId) => {
-      await router.push(`/chat/${newChatId}`);
+    onSuccess: (newChatId) => {
+      router.push(`/chat/${newChatId}`);
     },
   });
 
@@ -62,7 +62,7 @@ export default function ChatSidebar({
                   const date = new Date(chat.createdAt);
                   const month = date.getMonth() + 1;
                   const day = date.getDate();
-                  const message = chat.lastMessage || "New conversation";
+                  const message = chat.lastMessage ?? "New conversation";
                   return `${month}/${day} ${message}`;
                 })()}
               </div>

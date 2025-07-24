@@ -18,8 +18,8 @@ import {
 } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import ControlledSelect from "./ControlledSelect";
-import { Paperclip } from "lucide-react";
-import FileUploadButton from "./FileUpload";
+import { Paperclip, X } from "lucide-react";
+import FileUploadButton, { type ImagePreview, type Attachment } from "./FileUpload";
 
 interface ChatProps {
   id: string;
@@ -29,6 +29,8 @@ interface ChatProps {
 export default function Chat({ id, initialMessages }: ChatProps) {
   const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
   const [files, setFiles] = useState<FileList | undefined>(undefined);
+  const [attachment, setAttachment] = useState<Attachment | undefined>(undefined);
+  const [imagePreview, setImagePreview] = useState<ImagePreview | undefined>(undefined);
 
   const {
     messages,
@@ -54,31 +56,51 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     experimental_prepareRequestBody({ messages, id }) {
       return { message: messages[messages.length - 1], id };
     },
-    onFinish: (lastGeneratedMessage) => {
-      // Simply save the current messages array plus the new AI response
-      // The useChat hook already manages the messages state correctly
-      const fullChatHistoryForSave = [...messages, lastGeneratedMessage];
-
-      void fetch("/api/save-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, messages: fullChatHistoryForSave }),
+    onFinish: (message) => {
+      console.log('onFinish called:', {
+        messageId: message.id,
+        messageRole: message.role,
+        currentMessagesCount: messages.length
       });
+      // The useChat hook will automatically update the messages state
+      // We'll save in the useEffect when messages change
     },
     onError: (error) => {
       console.error("client side: ai stream error:", error);
+
+      // Save messages even if AI request fails
+      console.log('Saving messages after error, current messages count:', messages.length);
+      void saveMessages(messages);
     },
   });
+
+  const saveMessages = useCallback(async (messagesToSave: Message[]) => {
+    console.log('Saving messages:', {
+      count: messagesToSave.length,
+      roles: messagesToSave.map(m => ({ id: m.id, role: m.role }))
+    });
+
+    try {
+      const response = await fetch("/api/save-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, messages: messagesToSave }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to save messages:', response.status, response.statusText);
+      } else {
+        console.log('Messages saved successfully');
+      }
+    } catch (error) {
+      console.error('Error saving messages:', error);
+    }
+  }, [id]);
 
   const handleDelete = (messageId: string) => {
     const newMessages = messages.filter((message) => message.id !== messageId);
     setMessages(newMessages);
-    console.log(newMessages);
-    void fetch("/api/save-chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, messages: newMessages }),
-    });
+    void saveMessages(newMessages);
   };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -104,6 +126,24 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, userHasScrolled]);
+
+  // Save messages when they change, with debouncing
+  const lastSavedCountRef = useRef(0);
+  useEffect(() => {
+    if (messages.length > 0 && messages.length !== lastSavedCountRef.current) {
+      const timeoutId = setTimeout(() => {
+        console.log('Auto-saving messages:', messages.length);
+        void saveMessages(messages);
+        lastSavedCountRef.current = messages.length;
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages, saveMessages]);
+
+
+
+
 
   // Add scroll event listener
   useEffect(() => {
@@ -180,7 +220,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="pt-0">
-                            <div className="whitespace-pre-wrap">{part.text}</div>
+                            {/* Display images above the text */}
                             {message?.experimental_attachments
                               ?.filter((attachment) =>
                                 attachment?.contentType?.startsWith("image/"),
@@ -189,12 +229,15 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                                 <Image
                                   key={`${message.id}-${index}`}
                                   src={attachment.url}
-                                  width={500}
-                                  height={500}
+                                  width={400}
+                                  height={400}
                                   alt={attachment.name ?? `attachment-${index}`}
-                                  className="mt-2 rounded-md"
+                                  className="mb-3 rounded-md object-cover"
                                 />
                               ))}
+
+                            {/* Display text content below images */}
+                            <div className="whitespace-pre-wrap">{part.text}</div>
                           </CardContent>
                         </Card>
                       );
@@ -230,14 +273,45 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       </div>
       {/* Input form fixed at the bottom */}
       <div className="border-t bg-background p-4">
+        {/* Image preview in input area */}
+        {imagePreview && (
+          <div className="mb-4">
+            <div className="relative inline-block">
+              <Image
+                src={imagePreview.preview}
+                alt="Selected tarot spread"
+                width={150}
+                height={150}
+                className="rounded-lg border object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute -right-2 -top-2 h-6 w-6"
+                onClick={() => {
+                  setImagePreview(undefined);
+                  setFiles(undefined);
+                  setAttachment(undefined);
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
         <form
           className="mx-auto flex max-w-4xl items-center space-x-2 rounded-lg border bg-background p-2 shadow-sm"
           onSubmit={(event) => {
             handleSubmit(event, {
-              experimental_attachments: files,
+              experimental_attachments: attachment ? [attachment] : undefined,
+              data: { selectedModel },
             });
 
+            // Clear the file state after submission
             setFiles(undefined);
+            setAttachment(undefined);
+            setImagePreview(undefined);
           }}
         >
           {files && files.length > 0 && (
@@ -246,7 +320,12 @@ export default function Chat({ id, initialMessages }: ChatProps) {
               <span>{files.length}</span>
             </div>
           )}
-          <FileUploadButton onFilesSelected={setFiles} />
+          <FileUploadButton
+            onFilesSelected={setFiles}
+            onImagePreview={setImagePreview}
+            onAttachmentCreated={setAttachment}
+            imagePreview={imagePreview}
+          />
           <Input
             type="text"
             value={input}
