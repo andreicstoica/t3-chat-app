@@ -9,5 +9,5 @@ Chats with AI support tool calling, generative UI, response streaming, and more.
 First, run the development server:
 
 ```bash
-bun run dev
+pnpm run dev
 ```
