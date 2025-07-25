@@ -5,10 +5,11 @@ import Image from "next/image";
 import { TRPCReactProvider } from "~/trpc/react";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Cinzel, Crimson_Text } from "next/font/google";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
 
-import { AuthStatus } from "~/components/auth-status";
+import { ConditionalHeader } from "~/components/conditional-header";
 
 export const metadata: Metadata = {
   title: "Daily Tarot",
@@ -25,11 +26,23 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: "--font-cinzel",
+  weight: ["400", "500", "600", "700"],
+});
+
+const crimsonText = Crimson_Text({
+  subsets: ["latin"],
+  variable: "--font-crimson",
+  weight: ["400", "600", "700"],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${geist.variable} ${cinzel.variable} ${crimsonText.variable}`} suppressHydrationWarning>
       <head />
       <body>
         <ThemeProvider
@@ -40,13 +53,7 @@ export default function RootLayout({
         >
           <TRPCReactProvider>
             <div className="flex h-screen min-h-0 flex-col overflow-hidden">
-              {/* Auth Status Bar at the top */}
-              <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 border-b backdrop-blur">
-                <div className="flex h-16 items-center justify-between px-4">
-                  <Image src={logo} alt="logo" width={50} height={50} />
-                  <AuthStatus />
-                </div>
-              </div>
+              <ConditionalHeader />
 
               <main className="min-h-0 flex-1 overflow-hidden">
                 {/* Main Content */}

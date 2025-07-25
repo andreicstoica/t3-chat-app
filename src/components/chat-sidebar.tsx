@@ -27,7 +27,7 @@ export default function ChatSidebar({
     initialData: initialChats,
   });
 
-  // 1. Set up the mutation hook BEFORE the return statement
+  // Set up the mutation hook
   const createChatMutation = api.chat.create.useMutation({
     onSuccess: (newChatId) => {
       router.push(`/chat/${newChatId}`);
@@ -39,14 +39,34 @@ export default function ChatSidebar({
       // Clear the deleting state
       setDeletingChatId(null);
 
-      // Invalidate and refetch chat list
-      void utils.chat.list.invalidate();
-
-      // If we deleted the current chat, redirect to home
-      // The AuthRedirect component will handle creating a new chat if needed
+      // If we deleted the current chat, navigate to the next available chat
       if (variables.chatId === currentChatId) {
-        router.push('/');
+        const remainingChats = chats.filter(chat => chat.id !== variables.chatId);
+
+        if (remainingChats.length > 0) {
+          // Find the current chat's index to determine the next chat
+          const currentIndex = chats.findIndex(chat => chat.id === currentChatId);
+          let nextChat;
+
+          if (currentIndex < remainingChats.length) {
+            // If there's a chat after the current one, use it
+            nextChat = remainingChats[currentIndex];
+          } else {
+            // Otherwise, use the previous chat (or the first one)
+            nextChat = remainingChats[Math.max(0, currentIndex - 1)];
+          }
+
+          if (nextChat) {
+            router.push(`/chat/${nextChat.id}`);
+          }
+        } else {
+          // No chats left, go to home
+          router.push('/');
+        }
       }
+
+      // Invalidate and refetch chat list after navigation
+      void utils.chat.list.invalidate();
     },
     onError: () => {
       // Clear the deleting state on error
@@ -103,7 +123,7 @@ export default function ChatSidebar({
                   isDeleting && "pointer-events-none"
                 )}
               >
-                <div className="relative overflow-hidden pr-8">
+                <div className="pr-8">
                   <div className="truncate text-sm">
                     {(() => {
                       const date = new Date(chat.createdAt);
@@ -113,12 +133,6 @@ export default function ChatSidebar({
                       return `${month}/${day} ${message}`;
                     })()}
                   </div>
-                  <div className={clsx(
-                    "absolute inset-y-0 right-8 w-8 bg-gradient-to-l to-transparent",
-                    chat.id === currentChatId
-                      ? "from-accent"
-                      : "from-background group-hover:from-muted"
-                  )} />
                 </div>
 
                 {/* Loading overlay */}
