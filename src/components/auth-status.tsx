@@ -2,11 +2,16 @@
 
 import { useSession, signOut } from "~/lib/auth-client";
 import { Button } from "~/components/ui/button";
-import { LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 export function AuthStatus() {
   const { data: session, isPending } = useSession();
+  const pathname = usePathname();
+
+  // Don't show sign in button on the landing page (root path)
+  const isLandingPage = pathname === '/';
 
   if (isPending) {
     return (
@@ -18,6 +23,11 @@ export function AuthStatus() {
   }
 
   if (!session?.user) {
+    // Don't show sign in button on landing page to avoid duplication
+    if (isLandingPage) {
+      return null;
+    }
+
     return (
       <div className="flex items-center gap-2">
         <Link href="/signin">
@@ -31,13 +41,9 @@ export function AuthStatus() {
 
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 text-sm">
-        <User className="h-4 w-4" />
-        <span className="text-muted-foreground">Welcome,</span>
-        <span className="font-medium">
-          {session.user.name || session.user.email}
-        </span>
-      </div>
+      <span className="text-sm font-medium">
+        {session.user.name || session.user.email}
+      </span>
       <Button
         variant="outline"
         size="sm"

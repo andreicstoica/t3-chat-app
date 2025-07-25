@@ -117,8 +117,7 @@ export async function saveChatMessages({
     if (updatedRows.length === 0) {
       console.warn(`[saveChatMessages] No rows updated for chat ID: ${id}. Does it exist in the DB?`);
     } else {
-      console.log(`[saveChatMessages] Successfully updated chat ID: ${id}. Updated rows count: ${updatedRows.length}`);
-      console.log(`[saveChatMessages] Updated chat ID: ${updatedRows[0]?.id}`); // Log the ID of the first updated row
+
     }
   } catch (error) {
     console.error(`[saveChatMessages] Error during Drizzle update for chat ID ${id}:`, error);
