@@ -1,8 +1,8 @@
 // app/api/save-chat/route.ts
 import { saveChatMessages } from '~/lib/chat-store';
-import type { Message } from 'ai'; 
+import type { Message } from 'ai';
 
-export const maxDuration = 10; 
+export const maxDuration = 10;
 
 export async function POST(req: Request) {
   try {
@@ -16,9 +16,7 @@ export async function POST(req: Request) {
       return new Response('Chat ID and messages are required', { status: 400 });
     }
 
-    console.log(`[SaveChat API] Saving chat ID: ${id} with ${messages.length} messages.`);
     await saveChatMessages({ id, messages });
-    console.log(`[SaveChat API] Chat ID: ${id} saved successfully.`);
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });
   } catch (error) {

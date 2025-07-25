@@ -26,12 +26,6 @@ export const chatRouter = createTRPCRouter({
           ? getLastMessageContent(messages[messages.length - 1]!)
           : null;
 
-        // Debug logging
-        console.log(`Chat ${chat.id}: ${messages.length} messages, lastMessage: "${lastMessage}"`);
-        if (messages.length > 0) {
-          console.log(`Last message structure:`, JSON.stringify(messages[messages.length - 1], null, 2));
-        }
-
         return {
           ...chat,
           lastMessage: lastMessage ?? "New conversation",
@@ -63,5 +57,23 @@ export const chatRouter = createTRPCRouter({
       })
 
       return newChatId
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ chatId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      // First verify the chat exists and belongs to the user
+      const foundChat = await ctx.db.query.chats.findFirst({
+        where: eq(chats.id, input.chatId)
+      });
+
+      if (!foundChat || foundChat.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+
+      // Delete the chat
+      await ctx.db.delete(chats).where(eq(chats.id, input.chatId));
+
+      return { success: true };
     })
 });

@@ -27,8 +27,8 @@ import { auth } from "~/lib/auth";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const authSession = await auth.api.getSession({headers:opts.headers})
-  console.log("session object on server:", authSession);
+  const authSession = await auth.api.getSession({ headers: opts.headers })
+
   return {
     db,
     user: authSession?.user,
@@ -103,7 +103,7 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
 const sessionValidatorMiddleware = t.middleware(async ({ next, ctx }) => {
   if (!ctx.user?.id) {
-    throw new TRPCError({ code: "UNAUTHORIZED"})
+    throw new TRPCError({ code: "UNAUTHORIZED" })
   }
 
   return next({

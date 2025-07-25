@@ -141,10 +141,6 @@ export default function Chat({ id, initialMessages }: ChatProps) {
     }
   }, [messages, saveMessages]);
 
-
-
-
-
   // Add scroll event listener
   useEffect(() => {
     const scrollContainer = scrollAreaRef.current;
@@ -173,7 +169,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       {/* Scrollable message container */}
       <div className="min-h-0 flex-1 overflow-hidden px-4">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
-          <div className="space-y-4 pb-4">
+          <div className="space-y-3 pb-4">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -188,16 +184,18 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                       return (
                         <Card
                           className={clsx(
-                            message.role === "user" && "bg-muted",
-                            "w-2/3 max-w-2/3",
+                            message.role === "user"
+                              ? "bg-accent/50 border-accent/30"
+                              : "tarot-border bg-card/50",
+                            "min-w-[30%] max-w-[70%] shadow-sm",
                           )}
                           key={`${message.id}-${i}`}
                         >
-                          <CardHeader className="relative pb-2">
+                          <CardHeader className="relative px-4 py-3 pb-2">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
-                                  className="absolute -top-2 right-2 h-6 w-6 p-0"
+                                  className="absolute right-2 h-6 w-6 p-0 opacity-60 hover:opacity-100"
                                   variant="ghost"
                                   size="sm"
                                 >
@@ -215,11 +213,11 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <CardTitle className="text-sm font-medium">
+                            <CardTitle className="text-sm font-medium text-muted-foreground font-display">
                               {message.role === "user" ? "You" : "AI"}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="pt-0">
+                          <CardContent className="px-4 pb-4 pt-0">
                             {/* Display images above the text */}
                             {message?.experimental_attachments
                               ?.filter((attachment) =>
@@ -229,23 +227,23 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                                 <Image
                                   key={`${message.id}-${index}`}
                                   src={attachment.url}
-                                  width={400}
-                                  height={400}
+                                  width={200}
+                                  height={300}
                                   alt={attachment.name ?? `attachment-${index}`}
-                                  className="mb-3 rounded-md object-cover"
+                                  className="mb-2 rounded-md object-cover"
                                 />
                               ))}
 
                             {/* Display text content below images */}
-                            <div className="whitespace-pre-wrap">{part.text}</div>
+                            <div className="whitespace-pre-wrap text-md font-body leading-relaxed">{part.text}</div>
                           </CardContent>
                         </Card>
                       );
                     case "tool-invocation":
                       return (
-                        <Card key={`${message.id}-${i}`} className="w-full">
-                          <CardContent className="p-4">
-                            <pre className="text-sm overflow-x-auto">
+                        <Card key={`${message.id}-${i}`} className="max-w-[75%] tarot-border bg-card/30">
+                          <CardContent className="p-3">
+                            <pre className="text-xs overflow-x-auto font-mono">
                               {JSON.stringify(part.toolInvocation, null, 2)}
                             </pre>
                           </CardContent>
@@ -271,11 +269,15 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           </div>
         </ScrollArea>
       </div>
-      {/* Input form fixed at the bottom */}
-      <div className="border-t bg-background p-4">
+
+      {/* Floating input form at the bottom */}
+      <div className="p-6 relative">
+        {/* Smooth gradient fade */}
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-t from-background/80 via-background/40 to-transparent pointer-events-none"></div>
+
         {/* Image preview in input area */}
         {imagePreview && (
-          <div className="mb-4">
+          <div className="mb-4 relative z-10">
             <div className="relative inline-block">
               <Image
                 src={imagePreview.preview}
@@ -301,7 +303,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           </div>
         )}
         <form
-          className="mx-auto flex max-w-4xl items-center space-x-2 rounded-lg border bg-background p-2 shadow-sm"
+          className="mx-auto flex max-w-4xl items-center space-x-2 rounded-lg border bg-card/90 backdrop-blur-sm p-3 relative z-10"
           onSubmit={(event) => {
             handleSubmit(event, {
               experimental_attachments: attachment ? [attachment] : undefined,
