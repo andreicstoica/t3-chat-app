@@ -5,17 +5,20 @@
 
 @theme {
   --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
   --font-serif:
-    var(--font-cinzel), ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+    var(--font-stix-two-text), ui-serif, Georgia, Cambria, "Times New Roman",
+    Times, serif;
   --font-display:
-    var(--font-cinzel), ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+    var(--font-stix-two-text), ui-serif, Georgia, Cambria, "Times New Roman",
+    Times, serif;
   --font-body:
-    var(--font-crimson), ui-serif, Georgia, Cambria, "Times New Roman", Times,
-    serif;
+    var(--font-stix-two-text), ui-serif, Georgia, Cambria, "Times New Roman",
+    Times, serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
 }
 
 @theme inline {

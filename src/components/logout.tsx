@@ -14,7 +14,7 @@ export function Logout() {
 
   return (
     <Button className="w-1/20" onClick={handleLogout}>
-      Logout 👋
+      Log out 👋
     </Button>
   );
 }

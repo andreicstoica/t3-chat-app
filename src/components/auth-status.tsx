@@ -11,13 +11,15 @@ export function AuthStatus() {
   const pathname = usePathname();
 
   // Don't show sign in button on the landing page (root path)
-  const isLandingPage = pathname === '/';
+  const isLandingPage = pathname === "/";
 
   if (isPending) {
     return (
       <div className="text-muted-foreground flex items-center gap-2 text-sm">
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        Loading...
+        <span className="text-xs font-medium tracking-wide uppercase">
+          Loading
+        </span>
       </div>
     );
   }
@@ -41,15 +43,20 @@ export function AuthStatus() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-medium">
-        {session.user.name || session.user.email}
-      </span>
+      <div className="text-right">
+        <div className="mb-1 text-xs font-medium tracking-wide uppercase">
+          Signed In
+        </div>
+        <span className="text-sm font-medium">
+          {session.user.name || session.user.email}
+        </span>
+      </div>
       <Button
         variant="outline"
         size="sm"
         onClick={async () => {
           await signOut();
-          window.location.href = '/';
+          window.location.href = "/";
         }}
         className="gap-2"
       >

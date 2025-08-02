@@ -2,12 +2,10 @@ import "~/styles/globals.css";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
-import { Cinzel, Crimson_Text } from "next/font/google";
+import { STIX_Two_Text } from "next/font/google";
 import { ThemeProvider } from "~/components/theme-provider";
 import { Toaster } from "~/components/ui/sonner";
-
-import { ConditionalHeader } from "~/components/conditional-header";
+import { ModelProvider } from "~/lib/model-context";
 
 export const metadata: Metadata = {
   title: "Daily Tarot",
@@ -19,21 +17,11 @@ export const metadata: Metadata = {
   },
 };
 
-const geist = Geist({
+const stixTwoText = STIX_Two_Text({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  variable: "--font-cinzel",
+  variable: "--font-stix-two-text",
   weight: ["400", "500", "600", "700"],
-});
-
-const crimsonText = Crimson_Text({
-  subsets: ["latin"],
-  variable: "--font-crimson",
-  weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export default function RootLayout({
@@ -42,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${cinzel.variable} ${crimsonText.variable}`}
+      className={`${stixTwoText.variable}`}
       suppressHydrationWarning
     >
       <head />
@@ -54,15 +42,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            <div className="flex h-screen min-h-0 flex-col overflow-hidden">
-              <ConditionalHeader />
-
-              <main className="min-h-0 flex-1 overflow-hidden">
-                {/* Main Content */}
-                {children}
-                <Toaster />
-              </main>
-            </div>
+            <ModelProvider>
+              <div className="flex h-screen min-h-0 flex-col overflow-hidden">
+                <main className="min-h-0 flex-1 overflow-hidden">
+                  {/* Main Content */}
+                  {children}
+                  <Toaster />
+                </main>
+              </div>
+            </ModelProvider>
           </TRPCReactProvider>
         </ThemeProvider>
       </body>

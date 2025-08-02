@@ -17,13 +17,13 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import ControlledSelect from "./ControlledSelect";
 import { Paperclip, X } from "lucide-react";
 import FileUploadButton, {
   type ImagePreview,
   type Attachment,
 } from "./FileUpload";
 import { Markdown } from "./ui/markdown";
+import { useModel } from "~/lib/model-context";
 
 interface ChatProps {
   id: string;
@@ -31,7 +31,7 @@ interface ChatProps {
 }
 
 export default function Chat({ id, initialMessages }: ChatProps) {
-  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const { selectedModel } = useModel();
   const [files, setFiles] = useState<FileList | undefined>(undefined);
   const [attachment, setAttachment] = useState<Attachment | undefined>(
     undefined,
@@ -177,15 +177,8 @@ export default function Chat({ id, initialMessages }: ChatProps) {
 
   return (
     <div className="flex h-full w-full flex-col">
-      {/* Top Bar for the model selection */}
-      <div className="flex w-full items-center justify-end p-4 pb-2">
-        <ControlledSelect
-          value={selectedModel}
-          onValueChange={setSelectedModel}
-        />
-      </div>
       {/* Scrollable message container */}
-      <div className="min-h-0 flex-1 overflow-hidden px-4">
+      <div className="min-h-0 flex-1 overflow-hidden px-4 pt-4">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
           <div className="space-y-3 pb-4">
             {messages.map((message) => (
@@ -231,8 +224,8 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <CardTitle className="text-muted-foreground font-display text-sm font-medium">
-                              {message.role === "user" ? "You" : "AI"}
+                            <CardTitle className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                              {message.role === "user" ? "You" : "AI Assistant"}
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="px-4 pt-0 pb-3">
@@ -364,7 +357,9 @@ export default function Chat({ id, initialMessages }: ChatProps) {
             value={input}
             onChange={handleInputChange}
             placeholder={
-              status === "submitted" ? "Loading..." : "How can I help?"
+              status === "submitted"
+                ? "Loading..."
+                : "What shall we reflect on?"
             }
             disabled={status === "submitted"}
             className="flex-1 border-0 bg-transparent focus-visible:ring-0"

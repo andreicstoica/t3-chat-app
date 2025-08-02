@@ -23,6 +23,9 @@ export function LandingPage() {
           <h1 className="font-display mystical-text text-4xl font-bold tracking-tight sm:text-6xl">
             Daily Tarot
           </h1>
+          <div className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
+            AI-Powered Tarot Guidance
+          </div>
         </div>
         <p className="text-muted-foreground font-body mx-auto max-w-2xl text-xl leading-relaxed">
           Your personal AI companion for tarot reading insights and reflection.
@@ -35,6 +38,9 @@ export function LandingPage() {
         <Card className="tarot-border hover:mystical-glow group transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <MessageCircle className="text-primary mx-auto h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
+            <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+              Chat Guidance
+            </div>
             <h3 className="font-display text-lg font-semibold">
               AI Chat Guidance
             </h3>
@@ -48,6 +54,9 @@ export function LandingPage() {
         <Card className="tarot-border hover:mystical-glow group transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <ImageIcon className="text-primary mx-auto h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
+            <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+              Image Analysis
+            </div>
             <h3 className="font-display text-lg font-semibold">
               Card Image Analysis
             </h3>
@@ -60,6 +69,9 @@ export function LandingPage() {
         <Card className="tarot-border hover:mystical-glow group transition-all duration-300">
           <CardContent className="space-y-4 p-6">
             <Sparkles className="text-primary mx-auto h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
+            <div className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
+              Daily Reflection
+            </div>
             <h3 className="font-display text-lg font-semibold">
               Daily Reflection
             </h3>
