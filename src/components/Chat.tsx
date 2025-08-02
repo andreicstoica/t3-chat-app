@@ -177,6 +177,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
 
   return (
     <div className="flex h-full w-full flex-col">
+      <div className="x-0 y-0 fixed blur-2xl"></div>
       {/* Scrollable message container */}
       <div className="flex-1 overflow-hidden px-4 pt-22">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
