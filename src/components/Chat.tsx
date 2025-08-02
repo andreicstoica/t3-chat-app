@@ -17,9 +17,13 @@ import {
   DropdownMenuItem,
 } from "./ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import ControlledSelect from "./ControlledSelect";
 import { Paperclip, X } from "lucide-react";
-import FileUploadButton, { type ImagePreview, type Attachment } from "./FileUpload";
+import FileUploadButton, {
+  type ImagePreview,
+  type Attachment,
+} from "./FileUpload";
+import { Markdown } from "./ui/markdown";
+import { useModel } from "~/lib/model-context";
 
 interface ChatProps {
   id: string;
@@ -27,10 +31,14 @@ interface ChatProps {
 }
 
 export default function Chat({ id, initialMessages }: ChatProps) {
-  const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
+  const { selectedModel } = useModel();
   const [files, setFiles] = useState<FileList | undefined>(undefined);
-  const [attachment, setAttachment] = useState<Attachment | undefined>(undefined);
-  const [imagePreview, setImagePreview] = useState<ImagePreview | undefined>(undefined);
+  const [attachment, setAttachment] = useState<Attachment | undefined>(
+    undefined,
+  );
+  const [imagePreview, setImagePreview] = useState<ImagePreview | undefined>(
+    undefined,
+  );
 
   const {
     messages,
@@ -57,10 +65,10 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       return { message: messages[messages.length - 1], id };
     },
     onFinish: (message) => {
-      console.log('onFinish called:', {
+      console.log("onFinish called:", {
         messageId: message.id,
         messageRole: message.role,
-        currentMessagesCount: messages.length
+        currentMessagesCount: messages.length,
       });
       // The useChat hook will automatically update the messages state
       // We'll save in the useEffect when messages change
@@ -69,33 +77,43 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       console.error("client side: ai stream error:", error);
 
       // Save messages even if AI request fails
-      console.log('Saving messages after error, current messages count:', messages.length);
+      console.log(
+        "Saving messages after error, current messages count:",
+        messages.length,
+      );
       void saveMessages(messages);
     },
   });
 
-  const saveMessages = useCallback(async (messagesToSave: Message[]) => {
-    console.log('Saving messages:', {
-      count: messagesToSave.length,
-      roles: messagesToSave.map(m => ({ id: m.id, role: m.role }))
-    });
-
-    try {
-      const response = await fetch("/api/save-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, messages: messagesToSave }),
+  const saveMessages = useCallback(
+    async (messagesToSave: Message[]) => {
+      console.log("Saving messages:", {
+        count: messagesToSave.length,
+        roles: messagesToSave.map((m) => ({ id: m.id, role: m.role })),
       });
 
-      if (!response.ok) {
-        console.error('Failed to save messages:', response.status, response.statusText);
-      } else {
-        console.log('Messages saved successfully');
+      try {
+        const response = await fetch("/api/save-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, messages: messagesToSave }),
+        });
+
+        if (!response.ok) {
+          console.error(
+            "Failed to save messages:",
+            response.status,
+            response.statusText,
+          );
+        } else {
+          console.log("Messages saved successfully");
+        }
+      } catch (error) {
+        console.error("Error saving messages:", error);
       }
-    } catch (error) {
-      console.error('Error saving messages:', error);
-    }
-  }, [id]);
+    },
+    [id],
+  );
 
   const handleDelete = (messageId: string) => {
     const newMessages = messages.filter((message) => message.id !== messageId);
@@ -132,7 +150,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   useEffect(() => {
     if (messages.length > 0 && messages.length !== lastSavedCountRef.current) {
       const timeoutId = setTimeout(() => {
-        console.log('Auto-saving messages:', messages.length);
+        console.log("Auto-saving messages:", messages.length);
         void saveMessages(messages);
         lastSavedCountRef.current = messages.length;
       }, 500);
@@ -150,24 +168,18 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       handleScroll();
     };
 
-    scrollContainer.addEventListener('scroll', handleScrollEvent);
+    scrollContainer.addEventListener("scroll", handleScrollEvent);
 
     return () => {
-      scrollContainer.removeEventListener('scroll', handleScrollEvent);
+      scrollContainer.removeEventListener("scroll", handleScrollEvent);
     };
   }, [handleScroll]);
 
   return (
     <div className="flex h-full w-full flex-col">
-      {/* Top Bar for the model selection */}
-      <div className="flex w-full items-center justify-end p-4 pb-2">
-        <ControlledSelect
-          value={selectedModel}
-          onValueChange={setSelectedModel}
-        />
-      </div>
+      <div className="x-0 y-0 fixed blur-2xl"></div>
       {/* Scrollable message container */}
-      <div className="min-h-0 flex-1 overflow-hidden px-4">
+      <div className="flex-1 overflow-hidden px-4 pt-22">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
           <div className="space-y-3 pb-4">
             {messages.map((message) => (
@@ -175,7 +187,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                 key={message.id}
                 className={clsx(
                   "flex w-full",
-                  message.role === "user" ? "justify-end" : "justify-start"
+                  message.role === "user" ? "justify-end" : "justify-start",
                 )}
               >
                 {message.parts.map((part, i) => {
@@ -187,11 +199,11 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                             message.role === "user"
                               ? "bg-accent/50 border-accent/30"
                               : "tarot-border bg-card/50",
-                            "min-w-[30%] max-w-[70%] shadow-sm",
+                            "max-w-[70%] min-w-[30%] shadow-sm",
                           )}
                           key={`${message.id}-${i}`}
                         >
-                          <CardHeader className="relative px-4 py-3 pb-2">
+                          <CardHeader className="relative px-4 py-2 pb-1">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button
@@ -213,11 +225,11 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <CardTitle className="text-sm font-medium text-muted-foreground font-display">
-                              {message.role === "user" ? "You" : "AI"}
+                            <CardTitle className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+                              {message.role === "user" ? "You" : "AI Assistant"}
                             </CardTitle>
                           </CardHeader>
-                          <CardContent className="px-4 pb-4 pt-0">
+                          <CardContent className="px-4 pt-0 pb-3">
                             {/* Display images above the text */}
                             {message?.experimental_attachments
                               ?.filter((attachment) =>
@@ -235,15 +247,26 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                               ))}
 
                             {/* Display text content below images */}
-                            <div className="whitespace-pre-wrap text-md font-body leading-relaxed">{part.text}</div>
+                            {message.role === "assistant" ? (
+                              <Markdown className="text-md font-body leading-relaxed">
+                                {part.text}
+                              </Markdown>
+                            ) : (
+                              <div className="text-md font-body leading-relaxed whitespace-pre-wrap">
+                                {part.text}
+                              </div>
+                            )}
                           </CardContent>
                         </Card>
                       );
                     case "tool-invocation":
                       return (
-                        <Card key={`${message.id}-${i}`} className="max-w-[75%] tarot-border bg-card/30">
+                        <Card
+                          key={`${message.id}-${i}`}
+                          className="tarot-border bg-card/30 max-w-[75%]"
+                        >
                           <CardContent className="p-3">
-                            <pre className="text-xs overflow-x-auto font-mono">
+                            <pre className="overflow-x-auto font-mono text-xs">
                               {JSON.stringify(part.toolInvocation, null, 2)}
                             </pre>
                           </CardContent>
@@ -256,9 +279,11 @@ export default function Chat({ id, initialMessages }: ChatProps) {
               </div>
             ))}
             {error && (
-              <Card className="w-full border-destructive">
+              <Card className="border-destructive w-full">
                 <CardContent className="p-4">
-                  <div className="text-destructive mb-2">An error occurred.</div>
+                  <div className="text-destructive mb-2">
+                    An error occurred.
+                  </div>
                   <Button type="button" onClick={() => reload()} size="sm">
                     Retry
                   </Button>
@@ -271,13 +296,13 @@ export default function Chat({ id, initialMessages }: ChatProps) {
       </div>
 
       {/* Floating input form at the bottom */}
-      <div className="p-6 relative">
+      <div className="relative p-6">
         {/* Smooth gradient fade */}
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-t from-background/80 via-background/40 to-transparent pointer-events-none"></div>
+        <div className="from-background/80 via-background/40 pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-t to-transparent"></div>
 
         {/* Image preview in input area */}
         {imagePreview && (
-          <div className="mb-4 relative z-10">
+          <div className="relative z-10 mb-4">
             <div className="relative inline-block">
               <Image
                 src={imagePreview.preview}
@@ -290,7 +315,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute -right-2 -top-2 h-6 w-6"
+                className="absolute -top-2 -right-2 h-6 w-6"
                 onClick={() => {
                   setImagePreview(undefined);
                   setFiles(undefined);
@@ -303,7 +328,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           </div>
         )}
         <form
-          className="mx-auto flex max-w-4xl items-center space-x-2 rounded-lg border bg-card/90 backdrop-blur-sm p-3 relative z-10"
+          className="bg-card/90 relative z-10 mx-auto flex max-w-4xl items-center space-x-2 rounded-lg border p-3 backdrop-blur-sm"
           onSubmit={(event) => {
             handleSubmit(event, {
               experimental_attachments: attachment ? [attachment] : undefined,
@@ -317,7 +342,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
           }}
         >
           {files && files.length > 0 && (
-            <div className="flex items-center gap-1 px-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-1 px-2 text-sm">
               <Paperclip className="h-4 w-4" />
               <span>{files.length}</span>
             </div>
@@ -333,7 +358,9 @@ export default function Chat({ id, initialMessages }: ChatProps) {
             value={input}
             onChange={handleInputChange}
             placeholder={
-              status === "submitted" ? "Loading..." : "How can I help?"
+              status === "submitted"
+                ? "Loading..."
+                : "What shall we reflect on?"
             }
             disabled={status === "submitted"}
             className="flex-1 border-0 bg-transparent focus-visible:ring-0"

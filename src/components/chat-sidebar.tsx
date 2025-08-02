@@ -41,11 +41,15 @@ export default function ChatSidebar({
 
       // If we deleted the current chat, navigate to the next available chat
       if (variables.chatId === currentChatId) {
-        const remainingChats = chats.filter(chat => chat.id !== variables.chatId);
+        const remainingChats = chats.filter(
+          (chat) => chat.id !== variables.chatId,
+        );
 
         if (remainingChats.length > 0) {
           // Find the current chat's index to determine the next chat
-          const currentIndex = chats.findIndex(chat => chat.id === currentChatId);
+          const currentIndex = chats.findIndex(
+            (chat) => chat.id === currentChatId,
+          );
           let nextChat;
 
           if (currentIndex < remainingChats.length) {
@@ -61,7 +65,7 @@ export default function ChatSidebar({
           }
         } else {
           // No chats left, go to home
-          router.push('/');
+          router.push("/");
         }
       }
 
@@ -78,16 +82,16 @@ export default function ChatSidebar({
     e.preventDefault(); // Prevent navigation
     e.stopPropagation(); // Prevent event bubbling
 
-    if (confirm('Are you sure you want to delete this chat?')) {
+    if (confirm("Are you sure you want to delete this chat?")) {
       setDeletingChatId(chatId);
       deleteChatMutation.mutate({ chatId });
     }
   };
 
   return (
-    <div className="flex h-full w-64 flex-col overflow-hidden border-r bg-background">
+    <div className="bg-background flex h-full w-64 flex-col overflow-hidden border-r">
       {/* New Chat Button */}
-      <div className="p-4 border-b">
+      <div className="border-b p-4">
         <Button
           disabled={createChatMutation.isPending}
           onClick={() => createChatMutation.mutate()}
@@ -100,6 +104,9 @@ export default function ChatSidebar({
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
+        <div className="text-muted-foreground p-4 pb-2 text-xs font-medium tracking-wide uppercase">
+          Recent Chats
+        </div>
         {chats.map((chat) => {
           const isDeleting = deletingChatId === chat.id;
 
@@ -107,8 +114,8 @@ export default function ChatSidebar({
             <div
               key={chat.id}
               className={clsx(
-                "relative group transition-all duration-300 ease-in-out",
-                isDeleting && "opacity-50 scale-95 pointer-events-none"
+                "group relative transition-all duration-300 ease-in-out",
+                isDeleting && "pointer-events-none scale-95 opacity-50",
               )}
               onMouseEnter={() => !isDeleting && setHoveredChatId(chat.id)}
               onMouseLeave={() => setHoveredChatId(null)}
@@ -116,11 +123,11 @@ export default function ChatSidebar({
               <Link
                 href={`/chat/${chat.id}`}
                 className={clsx(
-                  "block p-4 border-b border-border/50 transition-colors relative",
+                  "border-border/50 relative block border-b p-4 transition-colors",
                   chat.id === currentChatId
                     ? "bg-accent text-accent-foreground font-medium"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  isDeleting && "pointer-events-none"
+                  isDeleting && "pointer-events-none",
                 )}
               >
                 <div className="pr-8">
@@ -137,7 +144,7 @@ export default function ChatSidebar({
 
                 {/* Loading overlay */}
                 {isDeleting && (
-                  <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                  <div className="bg-background/80 absolute inset-0 flex items-center justify-center">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   </div>
                 )}
@@ -148,7 +155,7 @@ export default function ChatSidebar({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                  className="hover:bg-destructive absolute top-1/2 right-2 h-6 w-6 -translate-y-1/2 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:text-white"
                   onClick={(e) => handleDeleteChat(e, chat.id)}
                   disabled={deleteChatMutation.isPending}
                   title="Delete chat"
