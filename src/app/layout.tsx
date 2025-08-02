@@ -1,6 +1,4 @@
 import "~/styles/globals.css";
-import logo from "~/../public/logo.png";
-import Image from "next/image";
 
 import { TRPCReactProvider } from "~/trpc/react";
 import { type Metadata } from "next";
@@ -42,7 +40,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${cinzel.variable} ${crimsonText.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geist.variable} ${cinzel.variable} ${crimsonText.variable}`}
+      suppressHydrationWarning
+    >
       <head />
       <body>
         <ThemeProvider
