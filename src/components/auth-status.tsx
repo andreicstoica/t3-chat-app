@@ -55,8 +55,13 @@ export function AuthStatus() {
         variant="outline"
         size="sm"
         onClick={async () => {
-          await signOut();
-          window.location.href = "/";
+          await signOut({
+            fetchOptions: {
+              onSuccess: () => {
+                window.location.href = "/";
+              },
+            },
+          });
         }}
         className="gap-2"
       >

@@ -23,9 +23,6 @@ export function LandingPage() {
           <h1 className="font-display mystical-text text-4xl font-bold tracking-tight sm:text-6xl">
             Daily Tarot
           </h1>
-          <div className="text-muted-foreground mt-2 text-xs font-medium tracking-wide uppercase">
-            AI-Powered Tarot Guidance
-          </div>
         </div>
         <p className="text-muted-foreground font-body mx-auto max-w-2xl text-xl leading-relaxed">
           Your personal AI companion for tarot reading insights and reflection.

@@ -39,12 +39,13 @@ export function ProfileCard({ variant = "full" }: ProfileCardProps) {
     .slice(0, 2);
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push("/");
-    } catch (error) {
-      console.error("Failed to sign out:", error);
-    }
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/");
+        },
+      },
+    });
   };
 
   // Compact version - single profile avatar button
@@ -73,10 +74,7 @@ export function ProfileCard({ variant = "full" }: ProfileCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="mt-2 w-56">
-            <div className="px-2 py-1.5">
-              <div className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
-                User Account
-              </div>
+            <div className="cursor-auto px-2 py-1.5">
               <div className="text-sm font-medium">{displayName}</div>
               <div className="text-muted-foreground text-xs">{user.email}</div>
             </div>
@@ -153,9 +151,6 @@ export function ProfileCard({ variant = "full" }: ProfileCardProps) {
 
           <DropdownMenuContent align="end" className="mt-2 w-56" sideOffset={5}>
             <div className="px-2 py-1.5">
-              <div className="text-muted-foreground mb-1 text-xs font-medium tracking-wide uppercase">
-                User Account
-              </div>
               <div className="text-sm font-medium">{displayName}</div>
               <div className="text-muted-foreground text-xs">{user.email}</div>
             </div>

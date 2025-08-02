@@ -178,7 +178,7 @@ export default function Chat({ id, initialMessages }: ChatProps) {
   return (
     <div className="flex h-full w-full flex-col">
       {/* Scrollable message container */}
-      <div className="min-h-0 flex-1 overflow-hidden px-4 pt-4">
+      <div className="flex-1 overflow-hidden px-4 pt-22">
         <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
           <div className="space-y-3 pb-4">
             {messages.map((message) => (

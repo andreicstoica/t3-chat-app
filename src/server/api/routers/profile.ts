@@ -21,11 +21,25 @@ export const profileRouter = createTRPCRouter({
   updateEmail: protectedProcedure
     .input(
       z.object({
-        email: z.string().email("Invalid email address"),
+        email: z
+          .string()
+          .email("Invalid email address")
+          .min(1, "Email cannot be empty")
+          .max(320, "Email address too long")
+          .toLowerCase()
+          .trim(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // Check if the new email is the same as current
+        if (input.email === ctx.user.email) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "New email must be different from current email",
+          });
+        }
+
         // Check if email is already taken by another user
         const existingUser = await ctx.db.query.user.findFirst({
           where: eq(user.email, input.email),
@@ -34,7 +48,7 @@ export const profileRouter = createTRPCRouter({
         if (existingUser && existingUser.id !== ctx.user.id) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Email address is already in use",
+            message: "Email address is already in use by another account",
           });
         }
 
@@ -50,7 +64,10 @@ export const profileRouter = createTRPCRouter({
           .returning();
 
         if (updatedUser.length === 0) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found or update failed",
+          });
         }
 
         return updatedUser[0];
@@ -60,7 +77,7 @@ export const profileRouter = createTRPCRouter({
         console.error("Error updating email:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to update email",
+          message: "Failed to update email address. Please try again.",
         });
       }
     }),
@@ -71,24 +88,46 @@ export const profileRouter = createTRPCRouter({
         name: z
           .string()
           .min(1, "Name cannot be empty")
-          .max(100, "Name too long"),
+          .max(100, "Name too long")
+          .trim(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const updatedUser = await ctx.db
-        .update(user)
-        .set({
-          name: input.name,
-          updatedAt: new Date(),
-        })
-        .where(eq(user.id, ctx.user.id))
-        .returning();
+      try {
+        // Check if the new name is the same as current
+        if (input.name === ctx.user.name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "New name must be different from current name",
+          });
+        }
 
-      if (updatedUser.length === 0) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+        const updatedUser = await ctx.db
+          .update(user)
+          .set({
+            name: input.name,
+            updatedAt: new Date(),
+          })
+          .where(eq(user.id, ctx.user.id))
+          .returning();
+
+        if (updatedUser.length === 0) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "User not found or update failed",
+          });
+        }
+
+        return updatedUser[0];
+      } catch (error) {
+        if (error instanceof TRPCError) throw error;
+
+        console.error("Error updating name:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update name. Please try again.",
+        });
       }
-
-      return updatedUser[0];
     }),
 
   deleteAccount: protectedProcedure
@@ -116,7 +155,17 @@ export const profileRouter = createTRPCRouter({
           await tx.delete(account).where(eq(account.userId, ctx.user.id));
 
           // Finally delete the user (this will cascade delete anything else)
-          await tx.delete(user).where(eq(user.id, ctx.user.id));
+          const deletedUsers = await tx
+            .delete(user)
+            .where(eq(user.id, ctx.user.id))
+            .returning();
+
+          if (deletedUsers.length === 0) {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "User not found or already deleted",
+            });
+          }
         });
 
         return { success: true };

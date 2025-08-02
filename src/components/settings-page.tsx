@@ -13,13 +13,11 @@ import {
   LogOut,
   Settings as SettingsIcon,
   Save,
-  AlertCircle,
   Cpu,
   Key,
   Trash2,
 } from "lucide-react";
 import { signOut, authClient } from "~/lib/auth-client";
-import { Alert, AlertDescription } from "~/components/ui/alert";
 import { useModel } from "~/lib/model-context";
 import { api } from "~/trpc/react";
 import ControlledSelect from "./ControlledSelect";
@@ -41,66 +39,103 @@ interface SettingsPageContentProps {
 export function SettingsPageContent({ user }: SettingsPageContentProps) {
   const router = useRouter();
   const { selectedModel, setSelectedModel } = useModel();
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [updateError, setUpdateError] = useState("");
   const [email, setEmail] = useState(user.email);
+  const [emailError, setEmailError] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   // tRPC mutations
   const updateEmailMutation = api.profile.updateEmail.useMutation({
     onSuccess: () => {
-      setUpdateSuccess(true);
-      setUpdateError("");
-      setTimeout(() => setUpdateSuccess(false), 3000);
+      setEmailError("");
+      // Show success alert and sign out
+      alert(
+        "Email updated successfully! You will now be signed out to verify your new email address.",
+      );
+      void signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.replace("/");
+          },
+        },
+      });
     },
     onError: (error) => {
-      setUpdateError(error.message);
-      setUpdateSuccess(false);
+      setEmailError(error.message);
     },
   });
 
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-
   const deleteAccountMutation = api.profile.deleteAccount.useMutation({
     onSuccess: () => {
-      void signOut();
-      router.push("/");
+      void signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            router.replace("/");
+          },
+        },
+      });
     },
     onError: (error) => {
-      setUpdateError(error.message);
+      setDeleteError(error.message);
     },
   });
 
   const handleEmailUpdate = async () => {
-    if (email === user.email) return;
+    setEmailError("");
 
-    setIsUpdating(true);
-    setUpdateError("");
-
-    try {
-      await updateEmailMutation.mutateAsync({ email });
-    } finally {
-      setIsUpdating(false);
+    if (email === user.email) {
+      setEmailError("New email must be different from current email");
+      return;
     }
+
+    if (!email.trim()) {
+      setEmailError("Email address cannot be empty");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address");
+      return;
+    }
+
+    await updateEmailMutation.mutateAsync({
+      email: email.toLowerCase().trim(),
+    });
   };
 
   const handlePasswordChange = async () => {
-    if (newPassword !== confirmPassword) {
-      setUpdateError("New passwords do not match");
+    setPasswordError("");
+
+    if (!currentPassword.trim()) {
+      setPasswordError("Current password is required");
+      return;
+    }
+
+    if (!newPassword.trim()) {
+      setPasswordError("New password is required");
       return;
     }
 
     if (newPassword.length < 8) {
-      setUpdateError("New password must be at least 8 characters");
+      setPasswordError("New password must be at least 8 characters");
       return;
     }
 
-    setIsChangingPassword(true);
-    setUpdateError("");
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    if (currentPassword === newPassword) {
+      setPasswordError("New password must be different from current password");
+      return;
+    }
 
     try {
       const result = await authClient.changePassword({
@@ -111,30 +146,44 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
 
       if (result.error) {
         if (result.error.message?.includes("Invalid password")) {
-          setUpdateError("Current password is incorrect");
+          setPasswordError("Current password is incorrect");
         } else {
-          setUpdateError(result.error.message || "Failed to change password");
+          setPasswordError(result.error.message || "Failed to change password");
         }
       } else {
-        setUpdateSuccess(true);
+        alert(
+          "Password changed successfully! You will now be signed out. Please sign in with your new password.",
+        );
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        setTimeout(() => setUpdateSuccess(false), 3000);
+
+        // Better Auth with revokeOtherSessions handles session invalidation automatically
+        // The session will be revoked and useSession will update reactively
+        router.replace("/");
       }
     } catch (error) {
-      setUpdateError("Failed to change password");
+      setPasswordError("Failed to change password");
       console.error("Password change error:", error);
-    } finally {
-      setIsChangingPassword(false);
     }
   };
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== "DELETE MY ACCOUNT") {
-      setUpdateError("Please type 'DELETE MY ACCOUNT' exactly to confirm");
+      setDeleteError("Please type 'DELETE MY ACCOUNT' exactly to confirm");
       return;
     }
+
+    // Additional confirmation dialog
+    const confirmed = confirm(
+      "Are you absolutely sure you want to delete your account? This action cannot be undone and will permanently delete all your data including chat history.",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleteError("");
 
     try {
       await deleteAccountMutation.mutateAsync({
@@ -146,12 +195,13 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
   };
 
   const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.push("/");
-    } catch (error) {
-      console.error("Failed to sign out:", error);
-    }
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.replace("/");
+        },
+      },
+    });
   };
 
   const formatDate = (date: Date) => {
@@ -175,20 +225,6 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
           Back to Chat
         </Button>
       </div>
-
-      {updateSuccess && (
-        <Alert className="border-green-200 bg-green-50 text-green-800">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Profile updated successfully!</AlertDescription>
-        </Alert>
-      )}
-
-      {updateError && (
-        <Alert className="border-red-200 bg-red-50 text-red-800">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{updateError}</AlertDescription>
-        </Alert>
-      )}
 
       {/* Model Selection */}
       <Card>
@@ -275,23 +311,27 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
             <Input
               id="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+              }}
               type="email"
               placeholder="Enter your email address"
+              className={emailError ? "border-red-500" : ""}
             />
+            {emailError && (
+              <p className="mt-1 text-sm text-red-600">{emailError}</p>
+            )}
             <p className="text-muted-foreground pl-1 text-sm">
-              Changing your email will require re-verification
+              Changing your email will require re-verification and you will be
+              signed out
             </p>
           </div>
 
           <div className="flex justify-start pl-1">
             <Button
               onClick={handleEmailUpdate}
-              disabled={
-                isUpdating ||
-                email === user.email ||
-                updateEmailMutation.isPending
-              }
+              disabled={email === user.email || updateEmailMutation.isPending}
               className="gap-2"
             >
               <Save className="h-4 w-4" />
@@ -319,8 +359,12 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
                 id="currentPassword"
                 type="password"
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  setPasswordError("");
+                }}
                 placeholder="Enter current password"
+                className={passwordError ? "border-red-500" : ""}
               />
             </div>
             <div className="space-y-2">
@@ -329,9 +373,16 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
                 id="newPassword"
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setPasswordError("");
+                }}
+                placeholder="Enter new password (minimum 8 characters)"
+                className={passwordError ? "border-red-500" : ""}
               />
+              {passwordError && (
+                <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm New Password</Label>
@@ -339,26 +390,28 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setPasswordError("");
+                }}
                 placeholder="Confirm new password"
+                className={passwordError ? "border-red-500" : ""}
               />
+              <p className="text-muted-foreground pl-1 text-sm">
+                Changing your password will sign you out and require you to sign
+                in again
+              </p>
             </div>
           </div>
 
           <div className="flex justify-start">
             <Button
               onClick={handlePasswordChange}
-              disabled={
-                isUpdating ||
-                isChangingPassword ||
-                !currentPassword ||
-                !newPassword ||
-                !confirmPassword
-              }
+              disabled={!currentPassword || !newPassword || !confirmPassword}
               className="gap-2"
             >
               <Key className="h-4 w-4" />
-              {isChangingPassword ? "Changing..." : "Change Password"}
+              Change Password
             </Button>
           </div>
         </CardContent>
@@ -408,10 +461,16 @@ export function SettingsPageContent({ user }: SettingsPageContentProps) {
               <Input
                 id="deleteConfirmation"
                 value={deleteConfirmation}
-                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                onChange={(e) => {
+                  setDeleteConfirmation(e.target.value);
+                  setDeleteError("");
+                }}
                 placeholder="DELETE MY ACCOUNT"
-                className="max-w-xs"
+                className={`max-w-xs ${deleteError ? "border-red-500" : ""}`}
               />
+              {deleteError && (
+                <p className="mt-1 text-sm text-red-600">{deleteError}</p>
+              )}
             </div>
             <Button
               variant="destructive"
